@@ -56,10 +56,14 @@ const Titration = () => {
 					}
 
 					.erlenmeyer-neck {
-						width: 20px;
+						width: 50px;
 						height: 40px;
-						border: 2px solid #333;
+						border: 4px solid #333;
+						border-bottom: none;
+						border-radius: 4px;
 						margin: 0 auto;
+						position: relative;
+						z-index: 1;
 					}
 
 					.erlenmeyer-body {
@@ -70,22 +74,7 @@ const Titration = () => {
 						flex-direction: column;
 						justify-content: space-between;
 						padding: 20px 0;
-					}
-
-					.flask-line {
-						width: 100%;
-						height: 1px;
-						background: #333;
-						position: relative;
-					}
-
-					.flask-line::after {
-						content: attr(data-value);
-						position: absolute;
-						left: 105%;
-						top: -10px;
-						font-size: 12px;
-						color: #333;
+						margin-top: -2px;
 					}
 
 					.flask-outline {
@@ -94,10 +83,65 @@ const Titration = () => {
 						left: 0;
 						width: 100%;
 						height: 100%;
-						border-left: 2px solid #333;
-						border-right: 2px solid #333;
-						border-bottom: 2px solid #333;
-						clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
+						border: none;
+					}
+
+					.flask-side-left {
+						position: absolute;
+						top: 0;
+						left: 35%;
+						width: 4px;
+						height: 82%;
+						background: #333;
+						transform: skew(-17.73deg);
+						transform-origin: top;
+						border-radius: 0px 1px 0px 0px;
+					}
+
+					.flask-side-right {
+						position: absolute;
+						top: 0;
+						right: 35%;
+						width: 4px;
+						height: 82%;
+						background: #333;
+						transform: skew(17.73deg);
+						transform-origin: top;
+						border-radius: 0px 0px 1px 0px;
+					}
+
+					.flask-bottom {
+						position: absolute;
+						bottom: 10px;
+						left: 20%;
+						width: 60%;
+						height: 4px;
+						background: #333;
+						border-radius: 2px;
+					}
+
+					.flask-curve-left {
+						position: absolute;
+						bottom: 10px;
+						left: 9%;
+						width: 20px;
+						height: 20px;
+						border: 4px solid #333;
+						border-right: none;
+						border-top: none;
+						border-radius: 0 0 0 20px;
+					}
+
+					.flask-curve-right {
+						position: absolute;
+						bottom: 10px;
+						right: 9%;
+						width: 20px;
+						height: 20px;
+						border: 4px solid #333;
+						border-left: none;
+						border-top: none;
+						border-radius: 0 0 20px 0;
 					}
 
 					.flask-liquid {
@@ -107,7 +151,6 @@ const Titration = () => {
 						width: 100%;
 						height: 60%;
 						transition: background-color 0.5s;
-						clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
 					}
 
 					.measurement-lines {
@@ -137,26 +180,6 @@ const Titration = () => {
 						font-size: 12px;
 						color: #333;
 					}
-
-					.triangle-left {
-						position: absolute;
-						top: 0;
-						left: 20%;
-						width: 2px;
-						height: 100%;
-						background: #333;
-						transform: skew(15deg);
-					}
-
-					.triangle-right {
-						position: absolute;
-						top: 0;
-						right: 20%;
-						width: 2px;
-						height: 100%;
-						background: #333;
-						transform: skew(-15deg);
-					}
 				`}
 			</style>
 			<div className="p-4">
@@ -182,11 +205,18 @@ const Titration = () => {
 							<div className="erlenmeyer-flask">
 								<div className="erlenmeyer-neck" />
 								<div className="erlenmeyer-body">
-									<div className="flask-outline" />
-									<div className="flask-line" data-value="400" />
+									<div className="flask-outline">
+										<div className="flask-side-left" />
+										<div className="flask-side-right" />
+										<div className="flask-bottom" />
+										<div className="flask-curve-left" />
+										<div className="flask-curve-right" />
+									</div>
+									{/* Temporarily comment out measurement lines */}
+									{/*<div className="flask-line" data-value="400" />
 									<div className="flask-line" data-value="300" />
 									<div className="flask-line" data-value="200" />
-									<div className="flask-line" data-value="100" />
+									<div className="flask-line" data-value="100" />*/}
 									<div 
 										className="flask-liquid"
 										style={{
