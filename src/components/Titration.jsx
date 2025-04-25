@@ -59,6 +59,9 @@ const Titration = () => {
 	// Add new state for instruction text fade
 	const [isInstructionFadingOut, setIsInstructionFadingOut] = useState(false);
 
+	// Add new state near other state declarations
+	const [showEquivalenceText, setShowEquivalenceText] = useState(false);
+
 	// Handler functions
 	const handleReset = () => {
 		setIsAnimating(false);
@@ -86,6 +89,7 @@ const Titration = () => {
 		setBuretteLiquidHeight(80);
 		setIsButtonFadingOut(false);
 		setIsInstructionFadingOut(false);
+		setShowEquivalenceText(false);
 	};
 
 	const handleStart = () => {
@@ -168,6 +172,10 @@ const Titration = () => {
 					// Wait a moment after color change before moving burette up
 					setTimeout(() => {
 						setIsBuretteSliding(false);
+						// Wait for burette animation to complete before showing text
+						setTimeout(() => {
+							setShowEquivalenceText(true);
+						}, 800);
 					}, 1000);
 				}
 			}, 1000);
@@ -891,7 +899,7 @@ const Titration = () => {
 									{showContinue && (
 										<>
 											<div className={`info-text fade-in ${isTextFadingOut ? 'fade-out' : ''}`}>
-												This indicator liquid will cause the flask's solution color to change once the solution becomes a neutral pH.
+												This indicator liquid will cause the flask's acidic solution's color to change once the solution becomes a neutral pH.
 											</div>
 											<button
 												className={`continue-button fade-in ${isTextFadingOut ? 'fade-out' : ''}`}
@@ -987,7 +995,7 @@ const Titration = () => {
 
 							{showInstructions && (
 								<div className={`info-text fade-in ${isInstructionFadingOut ? 'fade-out' : ''}`}>
-									Add drops of titrant into the solution until a change in color is seen.
+									Add drops of basic titrant into the acidic solution until a change in color is seen.
 								</div>
 							)}
 
@@ -999,6 +1007,12 @@ const Titration = () => {
 								>
 									Add 1mL
 								</button>
+							)}
+
+							{showEquivalenceText && (
+								<div className={`info-text fade-in`}>
+									You've reached the equivalence point! Now let's calculate how acidic our starting solution was.
+								</div>
 							)}
 						</div>
 					</div>
