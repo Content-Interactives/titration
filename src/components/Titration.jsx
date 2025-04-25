@@ -34,6 +34,31 @@ const Titration = () => {
 	// Add new state at the top with other states
 	const [isBuretteSliding, setIsBuretteSliding] = useState(false);
 
+	// Add new state near the other state declarations
+	const [showInstructions, setShowInstructions] = useState(false);
+
+	// Add new state for the Add 1mL button
+	const [showAddButton, setShowAddButton] = useState(false);
+
+	// Add new states at the top
+	const [clickCount, setClickCount] = useState(0);
+	const [isStopcockAnimating, setIsStopcockAnimating] = useState(false);
+
+	// Add new state for burette liquid height
+	const [buretteLiquidHeight, setBuretteLiquidHeight] = useState(80);
+
+	// Add new state near the other state declarations
+	const [isDropFalling, setIsDropFalling] = useState(false);
+
+	// Add new state near other state declarations
+	const [isAnimationInProgress, setIsAnimationInProgress] = useState(false);
+
+	// Add new state near other state declarations
+	const [isButtonFadingOut, setIsButtonFadingOut] = useState(false);
+
+	// Add new state for instruction text fade
+	const [isInstructionFadingOut, setIsInstructionFadingOut] = useState(false);
+
 	// Handler functions
 	const handleReset = () => {
 		setIsAnimating(false);
@@ -50,9 +75,17 @@ const Titration = () => {
 		setIsLineShrinking(false);
 		setIsPipetteExiting(false);
 		setIsBuretteSliding(false);
+		setShowInstructions(false);
+		setShowAddButton(false);
+		setClickCount(0);
+		setIsStopcockAnimating(false);
 		if (flaskLiquidRef.current) {
 			flaskLiquidRef.current.classList.remove('increased');
+			flaskLiquidRef.current.classList.remove('pink');
 		}
+		setBuretteLiquidHeight(80);
+		setIsButtonFadingOut(false);
+		setIsInstructionFadingOut(false);
 	};
 
 	const handleStart = () => {
@@ -89,10 +122,58 @@ const Titration = () => {
 						setShowPipette(false);
 						setIsPipetteExiting(false);
 						setIsBuretteSliding(true);
+						setTimeout(() => {
+							setShowInstructions(true);
+							setShowAddButton(true);
+						}, 800);
 					}, 800);
 				}, 500);
 			}, 500);
 		}, 300);
+	};
+
+	const handleAddClick = () => {
+		if (clickCount < 5 && !isAnimationInProgress) {
+			setIsAnimationInProgress(true);
+			setIsStopcockAnimating(true);
+			setBuretteLiquidHeight(prev => prev - 2);
+			setIsDropFalling(true);
+			
+			// If this is the 5th click, start the button and text fade out
+			if (clickCount === 4) {
+				setIsButtonFadingOut(true);
+				setIsInstructionFadingOut(true);
+				// Hide the button and instructions after the animation completes
+				setTimeout(() => {
+					setShowAddButton(false);
+					setShowInstructions(false);
+				}, 500);
+			}
+			
+			// Reset the stopcock animation after a shorter time
+			setTimeout(() => {
+				setIsStopcockAnimating(false);
+			}, 300);
+			
+			// Reset the drop after it's done falling
+			setTimeout(() => {
+				setIsDropFalling(false);
+				setIsAnimationInProgress(false);
+				
+				// Change color after the last drop and animate burette back up
+				if (clickCount === 4) {
+					if (flaskLiquidRef.current) {
+						flaskLiquidRef.current.classList.add('pink');
+					}
+					// Wait a moment after color change before moving burette up
+					setTimeout(() => {
+						setIsBuretteSliding(false);
+					}, 1000);
+				}
+			}, 1000);
+			
+			setClickCount(prevCount => prevCount + 1);
+		}
 	};
 
 	return (
@@ -264,12 +345,33 @@ const Titration = () => {
 						left: 15%;
 						width: 70%;
 						height: 82%;
-						transition: height 1s linear;
+						transition: height 1s linear, background-color 1s ease;
 						border-radius: 0 0 20px 20px;
 						background-color: rgba(173, 216, 230);
 						animation: waveMotion 2s ease-in-out infinite;
 						overflow: hidden;
 						z-index: 1;
+					}
+
+					.flask-liquid.pink {
+						background-color: rgba(255, 105, 180, 0.8);
+					}
+
+					// Update the wave colors for the pink state
+					.flask-liquid.pink + svg .parallax use {
+						fill: rgba(255, 105, 180, 0.7);
+					}
+
+					.flask-liquid.pink + svg .parallax use:nth-child(2) {
+						fill: rgba(255, 105, 180, 0.5);
+					}
+
+					.flask-liquid.pink + svg .parallax use:nth-child(3) {
+						fill: rgba(255, 105, 180, 0.3);
+					}
+
+					.flask-liquid.pink + svg .parallax use:nth-child(4) {
+						fill: rgba(255, 105, 180, 1);
 					}
 
 					.flask-liquid.increased {
@@ -377,7 +479,7 @@ const Titration = () => {
 						width: 20px;
 						height: 140px;
 						border: 4px solid #333;
-						border-radius: 4px 4px 0 0;
+						border-radius: 4px;
 						border-bottom: none;
 						position: relative;
 						background: white;
@@ -390,8 +492,8 @@ const Titration = () => {
 						left: 0;
 						width: 100%;
 						height: 80%;
-						background-color: rgba(173, 216, 230, 0.8);
-						transition: height 0.5s ease;
+						background-color: rgba(173, 216, 230);
+						transition: height 0.2s linear;
 					}
 
 					.stopcock {
@@ -419,7 +521,25 @@ const Titration = () => {
 						position: absolute;
 						bottom: 0;
 						left: 49%;
-						transform: translate(240%, -260%);
+						transform: translate(240%, -249%);
+						transition: clip-path 0.3s ease-in-out;
+						clip-path: inset(0 0 0 0);
+					}
+
+					.stopcock-tip.shrink {
+						clip-path: inset(35% 0 35% 0);
+					}
+
+					.stopcock-valve {
+						position: absolute;
+						width: 15px;
+						height: 15px;
+						background: #333;
+						border-radius: 2px;
+						top: 50%;
+						left: 50%;
+						transform: translate(-50%, -330%);
+						z-index: 2;
 					}
 
 					.burette-thin-section {
@@ -427,12 +547,13 @@ const Titration = () => {
 						height: 50px;
 						border: 4px solid #333;
 						border-top: none;
-						border-radius: 0 0 4px 4px;
+						border-bottom: none;
 						position: relative;
 						background: white;
 						margin: 0 auto;
 						margin-top: -4px;
 						overflow: hidden;
+						border-radius: 0px 0px 2px 2px;
 					}
 
 					.burette-thin-liquid {
@@ -440,7 +561,7 @@ const Titration = () => {
 						top: 0;
 						left: 0;
 						width: 100%;
-						height: 65%;
+						height: 60%;
 						background-color: rgba(173, 216, 230, 0.8);
 						transition: height 0.5s ease;
 					}
@@ -558,6 +679,7 @@ const Titration = () => {
 						width: 20px;
 						height: 120px;
 						transform: rotate(45deg);
+						animation: pipetteEnter 0.5s ease-out forwards;
 					}
 
 					.pipette-bulb {
@@ -680,6 +802,71 @@ const Titration = () => {
 							opacity: 0;
 						}
 					}
+
+					.instruction-text {
+						position: absolute;
+						top: 1rem;
+						right: 0.1rem;
+						max-width: 200px;
+						font-size: 0.875rem;
+						color: #666;
+						line-height: 1.4;
+						text-align: center;
+					}
+
+					.drop {
+						position: absolute;
+						width: 3px;
+						height: 25px;
+						background-color: rgba(173, 216, 230);
+						border-radius: 50%;
+						left: 50%;
+						transform: translateX(-48%);
+						top: 60%;
+						z-index: 0;
+					}
+
+					.drop.falling {
+						animation: dropFall 1s linear forwards;
+					}
+
+					@keyframes dropFall {
+						0% {
+							transform: translateX(-50%) translateY(0);
+							opacity: 1;
+						}
+						100% {
+							transform: translateX(-50%) translateY(200px);
+							opacity: 0;
+						}
+					}
+
+					@keyframes buttonFadeOut {
+						from {
+							opacity: 1;
+							transform: translateY(0);
+						}
+						to {
+							opacity: 0;
+							transform: translateY(10px);
+						}
+					}
+
+					.button-fade-out {
+						animation: buttonFadeOut 0.5s ease-out forwards;
+						pointer-events: none;
+					}
+
+					@keyframes pipetteEnter {
+						from {
+							opacity: 0;
+							transform: translate(20px, -20px) rotate(45deg);
+						}
+						to {
+							opacity: 1;
+							transform: translate(0, 0) rotate(45deg);
+						}
+					}
 				`}
 			</style>
 			<div className="p-4">
@@ -704,7 +891,7 @@ const Titration = () => {
 									{showContinue && (
 										<>
 											<div className={`info-text fade-in ${isTextFadingOut ? 'fade-out' : ''}`}>
-												An indicator liquid will cause the flask's solution color to change once the solution becomes a neutral pH.
+												This indicator liquid will cause the flask's solution color to change once the solution becomes a neutral pH.
 											</div>
 											<button
 												className={`continue-button fade-in ${isTextFadingOut ? 'fade-out' : ''}`}
@@ -728,16 +915,21 @@ const Titration = () => {
 							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
 								<div className="burette">
 									<div className="burette-body">
-										<div className="burette-liquid" />
+										<div 
+											className="burette-liquid" 
+											style={{ height: `${buretteLiquidHeight}%` }}
+										/>
 									</div>
 									<div className="burette-thin-section">
 										<div className="burette-thin-liquid" />
 									</div>
 									<div className="stopcock">
 										<div className="stopcock-horizontal" />
-										<div className="stopcock-tip" />
+										<div className={`stopcock-tip ${isStopcockAnimating ? 'shrink' : ''}`} />
+										<div className="stopcock-valve" />
 									</div>
 								</div>
+								<div className={`drop ${isDropFalling ? 'falling' : ''}`}></div>
 							</div>
 							
 							{/* Existing Erlenmeyer Flask */}
@@ -751,11 +943,6 @@ const Titration = () => {
 										<div className="flask-curve-left" />
 										<div className="flask-curve-right" />
 									</div>
-									{/* Temporarily comment out measurement lines */}
-									{/*<div className="flask-line" data-value="400" />
-									<div className="flask-line" data-value="300" />
-									<div className="flask-line" data-value="200" />
-									<div className="flask-line" data-value="100" />*/}
 									<div className="flask-liquid" ref={flaskLiquidRef}>
 										<svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
 											viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto">
@@ -796,6 +983,22 @@ const Titration = () => {
 										</div>
 									</div>
 								</>
+							)}
+
+							{showInstructions && (
+								<div className={`info-text fade-in ${isInstructionFadingOut ? 'fade-out' : ''}`}>
+									Add drops of titrant into the solution until a change in color is seen.
+								</div>
+							)}
+
+							{showAddButton && (
+								<button
+									className={`continue-button fade-in ${isButtonFadingOut ? 'button-fade-out' : ''}`}
+									onClick={handleAddClick}
+									disabled={isAnimationInProgress || clickCount >= 5}
+								>
+									Add 1mL
+								</button>
 							)}
 						</div>
 					</div>
