@@ -1,12 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 const Titration = () => {
+	// Add new state for button fade
+	const [isFadingOut, setIsFadingOut] = useState(false);
+
 	// Basic state management
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [feedback, setFeedback] = useState(null);
 	const [currentStep, setCurrentStep] = useState(1);
 	const [solutionColor, setSolutionColor] = useState('clear');
+	const [showPipette, setShowPipette] = useState(false);
+	const [showContinue, setShowContinue] = useState(false);
+
+	// Add new state for text fade
+	const [isTextFadingOut, setIsTextFadingOut] = useState(false);
+
+	// Add new state variable near the top with other state declarations
+	const [isPipetteDraining, setIsPipetteDraining] = useState(false);
+
+	// Add this state variable at the top with other state declarations
+	const [showGreenLine, setShowGreenLine] = useState(false);
+
+	// Add this state variable at the top with other state declarations
+	const [isLineShrinking, setIsLineShrinking] = useState(false);
+
+	// Add this at the top of your component
+	const flaskLiquidRef = useRef(null);
+
+	// First, add the new state near the other state declarations
+	const [isPipetteExiting, setIsPipetteExiting] = useState(false);
+
+	// Add new state at the top with other states
+	const [isBuretteSliding, setIsBuretteSliding] = useState(false);
 
 	// Handler functions
 	const handleReset = () => {
@@ -15,12 +41,58 @@ const Titration = () => {
 		setFeedback(null);
 		setCurrentStep(1);
 		setSolutionColor('clear');
+		setIsFadingOut(false);
+		setShowPipette(false);
+		setShowContinue(false);
+		setIsTextFadingOut(false);
+		setIsPipetteDraining(false);
+		setShowGreenLine(false);
+		setIsLineShrinking(false);
+		setIsPipetteExiting(false);
+		setIsBuretteSliding(false);
+		if (flaskLiquidRef.current) {
+			flaskLiquidRef.current.classList.remove('increased');
+		}
 	};
 
 	const handleStart = () => {
-		setIsAnimating(true);
-		setIsExpanded(true);
-		setFeedback(null);
+		setIsFadingOut(true);
+		setTimeout(() => {
+			setIsAnimating(true);
+			setIsExpanded(true);
+			setFeedback(null);
+			setShowPipette(true);
+			setTimeout(() => {
+				setShowContinue(true);
+			}, 500);
+		}, 300);
+	};
+
+	const handleContinue = () => {
+		setIsTextFadingOut(true);
+		setIsPipetteDraining(true);
+		setShowGreenLine(true);
+		if (flaskLiquidRef.current) {
+			flaskLiquidRef.current.classList.add('increased');
+		}
+		
+		setTimeout(() => {
+			setShowContinue(false);
+			setIsTextFadingOut(false);
+			setTimeout(() => {
+				setIsLineShrinking(true);
+				setTimeout(() => {
+					setShowGreenLine(false);
+					setIsLineShrinking(false);
+					setIsPipetteExiting(true);
+					setTimeout(() => {
+						setShowPipette(false);
+						setIsPipetteExiting(false);
+						setIsBuretteSliding(true);
+					}, 800);
+				}, 500);
+			}, 500);
+		}, 300);
 	};
 
 	return (
@@ -49,7 +121,7 @@ const Titration = () => {
 					}
 					.erlenmeyer-flask {
 						position: absolute;
-						bottom: 20px;
+						bottom: -1px;
 						left: 20px;
 						width: 160px;
 						height: 200px;
@@ -192,11 +264,16 @@ const Titration = () => {
 						left: 15%;
 						width: 70%;
 						height: 82%;
-						transition: background-color 0.5s;
+						transition: height 1s linear;
 						border-radius: 0 0 20px 20px;
-						background-color: rgba(255, 205, 210, 0.5);
+						background-color: rgba(173, 216, 230);
 						animation: waveMotion 2s ease-in-out infinite;
-						overflow: hidden;  /* Important to contain the waves */
+						overflow: hidden;
+						z-index: 1;
+					}
+
+					.flask-liquid.increased {
+						height: calc(82% + 10px);
 					}
 
 					.waves {
@@ -272,13 +349,25 @@ const Titration = () => {
 						color: #333;
 					}
 
-					.burette {
+					.burette-container {
 						position: absolute;
-						top: 20px;
-						left: 50%;
-						transform: translateX(-50%);
+						bottom: 230px;
+						left: 20px;
+						width: 160px;
 						height: 200px;
-						width: 30px;
+						display: flex;
+						justify-content: center;
+						transition: bottom 0.8s ease-in-out;
+					}
+
+					.burette-container.slide-down {
+						bottom: 160px;
+					}
+
+					.burette {
+						position: relative;  // Changed from absolute
+						height: 250px;
+						width: 200px;
 						display: flex;
 						flex-direction: column;
 						align-items: center;
@@ -315,23 +404,12 @@ const Titration = () => {
 					}
 
 					.stopcock-horizontal {
-						width: 30px;
+						width: 5px;
 						height: 4px;
 						background: #333;
 						position: absolute;
 						top: 50%;
-						transform: translateY(-50%);
-					}
-
-					.stopcock-valve {
-						width: 12px;
-						height: 12px;
-						background: #333;
-						border-radius: 50%;
-						position: absolute;
-						left: 50%;
-						top: 50%;
-						transform: translate(-50%, -50%);
+						transform: translate(150%,-1100%);
 					}
 
 					.stopcock-tip {
@@ -340,8 +418,8 @@ const Titration = () => {
 						background: #333;
 						position: absolute;
 						bottom: 0;
-						left: 50%;
-						transform: translateX(-50%);
+						left: 49%;
+						transform: translate(240%, -260%);
 					}
 
 					.burette-thin-section {
@@ -354,6 +432,253 @@ const Titration = () => {
 						background: white;
 						margin: 0 auto;
 						margin-top: -4px;
+						overflow: hidden;
+					}
+
+					.burette-thin-liquid {
+						position: absolute;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 65%;
+						background-color: rgba(173, 216, 230, 0.8);
+						transition: height 0.5s ease;
+					}
+
+					.base {
+						position: absolute;
+						bottom: 10px;
+						left: 0;
+						width: 200px;
+						height: 10px;
+						background: #333;
+						clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+					}
+
+					.stand {
+						position: absolute;
+						bottom: 10px;
+						left: 20px;
+						width: 4px;
+						height: 350px;
+						background: #333;
+					}
+
+					.burette-holder {
+						position: absolute;
+						top: 20px;
+						left: 20px;
+						width: 95px;
+						height: 4px;
+						background: #333;
+						transition: top 0.8s ease-in-out;
+					}
+
+					.burette-holder.slide-down {
+						top: 90px;
+					}
+
+					.burette-clamp {
+						position: absolute;
+						top: -3px;
+						right: 0;
+						width: 30px;
+						height: 10px;
+						background: #333;
+						border-radius: 2px;
+					}
+
+					.explore-button {
+						background-color: #00783E;
+						color: white;
+						border: none;
+						border-radius: 0.5rem;
+						padding: 0.5rem 1rem;
+						font-size: 0.875rem;
+						font-weight: 600;
+						cursor: pointer;
+						transition: all 0.2s;
+						box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+						position: absolute;
+						bottom: -0.05rem;
+						right: -0.05rem;
+					}
+
+					.explore-button:hover {
+						background-color: #006633;
+						transform: translateY(-1px);
+						box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+					}
+
+					@keyframes fadeIn {
+						from {
+							opacity: 0;
+							transform: translateY(10px);
+						}
+						to {
+							opacity: 1;
+							transform: translateY(0);
+						}
+					}
+
+					.fade-in {
+						animation: fadeIn 0.5s ease-out forwards;
+					}
+
+					.info-text {
+						position: absolute;
+						top: 1rem;
+						right: 0.1rem;
+						max-width: 200px;
+						font-size: 0.875rem;
+						color: #666;
+						line-height: 1.4;
+						text-align: center;
+					}
+
+					@keyframes fadeOut {
+						from {
+							opacity: 1;
+							transform: translateY(0);
+						}
+						to {
+							opacity: 0;
+							transform: translateY(10px);
+						}
+					}
+					
+					.fade-out {
+						animation: fadeOut 0.3s ease-out forwards;
+					}
+
+					.pipette {
+						position: absolute;
+						top: 70px;
+						left: 125px;
+						width: 20px;
+						height: 120px;
+						transform: rotate(45deg);
+					}
+
+					.pipette-bulb {
+						position: absolute;
+						top: 0;
+						left: 50%;
+						transform: translateX(-50%);
+						width: 15px;
+						height: 35px;
+						border: 2px solid #333;
+						border-radius: 20%;
+						background: white;
+						overflow: hidden;
+						background-color: #333;
+					}
+
+					.pipette-horizontal {
+						position: absolute;
+						top: 31px;
+						left: 50%;
+						transform: translateX(-50%);
+						width: 20px;
+						height: 4px;
+						background: #333;
+						z-index: 2;
+					}
+
+					.pipette-tube {
+						position: absolute;
+						top: 32px;
+						left: 50%;
+						transform: translateX(-50%);
+						width: 8px;
+						height: 75px;
+						border-left: 2px solid #333;
+						border-right: 2px solid #333;
+						background: white;
+						border-radius: 3px;
+						overflow: hidden;
+						z-index: 1;
+					}
+
+					.pipette-tube-liquid {
+						position: absolute;
+						bottom: 0;
+						left: 0;
+						width: 100%;
+						height: 70%;
+						background-color: rgba(160, 230, 103, 0.8);
+						transition: height 0.8s linear;
+						clip-path: polygon(
+							0 8%,
+							100% 0,
+							100% 100%,
+							0 100%
+						);
+					}
+
+					.pipette-tube-liquid.draining {
+						height: 0%;
+					}
+
+					.continue-button {
+						background-color: #00783E;
+						color: white;
+						border: none;
+						border-radius: 0.5rem;
+						padding: 0.5rem 1rem;
+						font-size: 0.875rem;
+						font-weight: 600;
+						cursor: pointer;
+						transition: all 0.2s;
+						box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+						position: absolute;
+						bottom: -0.05rem;
+						right: -0.05rem;
+					}
+
+					.continue-button:hover {
+						background-color: #006633;
+						transform: translateY(-1px);
+						box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+					}
+
+					.vertical-line {
+						position: absolute;
+						top: 160px;
+						left: 101px;
+						width: 3px;
+						height: 0;
+						background-color: rgba(160, 230, 103, 0.8);
+						opacity: 1;
+						z-index: 0;
+						transform-origin: top;
+						transition: height 0.5s linear;
+					}
+
+					.vertical-line.show {
+						height: 120px;
+					}
+
+					.vertical-line.shrink {
+						transform-origin: bottom;
+						height: 0;
+						top: 280px; /* This should be top (160px) + height (120px) */
+						transition: height 0.5s linear, top 0.5s linear;
+					}
+
+					.pipette-exit {
+						animation: pipetteExit 0.8s ease-out forwards;
+					}
+
+					@keyframes pipetteExit {
+						0% {
+							transform: translate(0, 0);
+							opacity: 1;
+						}
+						100% {
+							transform: translate(50px, -50px);
+							opacity: 0;
+						}
 					}
 				`}
 			</style>
@@ -374,16 +699,44 @@ const Titration = () => {
 					{/* Main interactive container */}
 					<div className="w-[400px] h-[400px] mx-auto bg-white border border-[#00783E]/30 rounded-md overflow-hidden relative p-4">
 						<div className="relative h-full">
-							{/* Add Burette */}
-							<div className="burette">
-								<div className="burette-body">
-									<div className="burette-liquid" />
-								</div>
-								<div className="burette-thin-section" />
-								<div className="stopcock">
-									<div className="stopcock-horizontal" />
-									<div className="stopcock-valve" />
-									<div className="stopcock-tip" />
+							{isExpanded && (
+								<>
+									{showContinue && (
+										<>
+											<div className={`info-text fade-in ${isTextFadingOut ? 'fade-out' : ''}`}>
+												An indicator liquid will cause the flask's solution color to change once the solution becomes a neutral pH.
+											</div>
+											<button
+												className={`continue-button fade-in ${isTextFadingOut ? 'fade-out' : ''}`}
+												onClick={handleContinue}
+											>
+												Continue
+											</button>
+										</>
+									)}
+								</>
+							)}
+							
+							{/* Add base and stand structure */}
+							<div className="base" />
+							<div className="stand" />
+							<div className={`burette-holder ${isBuretteSliding ? 'slide-down' : ''}`}>
+								<div className="burette-clamp" />
+							</div>
+
+							{/* Wrap burette components */}
+							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
+								<div className="burette">
+									<div className="burette-body">
+										<div className="burette-liquid" />
+									</div>
+									<div className="burette-thin-section">
+										<div className="burette-thin-liquid" />
+									</div>
+									<div className="stopcock">
+										<div className="stopcock-horizontal" />
+										<div className="stopcock-tip" />
+									</div>
 								</div>
 							</div>
 							
@@ -403,7 +756,7 @@ const Titration = () => {
 									<div className="flask-line" data-value="300" />
 									<div className="flask-line" data-value="200" />
 									<div className="flask-line" data-value="100" />*/}
-									<div className="flask-liquid">
+									<div className="flask-liquid" ref={flaskLiquidRef}>
 										<svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
 											viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto">
 											<defs>
@@ -420,7 +773,30 @@ const Titration = () => {
 								</div>
 							</div>
 
-							{/* Rest of the content remains the same */}
+							{!isExpanded && (
+								<button
+									className={`explore-button ${isFadingOut ? 'fade-out' : ''}`}
+									onClick={handleStart}
+									disabled={isAnimating}
+								>
+									Explore
+								</button>
+							)}
+
+							{showPipette && (
+								<>
+									<div className={`vertical-line ${showGreenLine ? 'show' : ''} ${isLineShrinking ? 'shrink' : ''}`}></div>
+									<div className={`fade-in ${isPipetteExiting ? 'pipette-exit' : ''}`} style={{ position: 'absolute' }}>
+										<div className="pipette">
+											<div className="pipette-bulb"></div>
+											<div className="pipette-horizontal"></div>
+											<div className="pipette-tube">
+												<div className={`pipette-tube-liquid ${isPipetteDraining ? 'draining' : ''}`}></div>
+											</div>
+										</div>
+									</div>
+								</>
+							)}
 						</div>
 					</div>
 				</div>
