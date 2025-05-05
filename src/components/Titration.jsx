@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const Titration = () => {
 	// Add new state for button fade
@@ -62,6 +62,217 @@ const Titration = () => {
 	// Add new state near other state declarations
 	const [showEquivalenceText, setShowEquivalenceText] = useState(false);
 
+	// Add new state for final continue button
+	const [showFinalContinue, setShowFinalContinue] = useState(false);
+
+	// Add new state for final text and fade-out
+	const [showCalculationText, setShowCalculationText] = useState(false);
+	const [isEquivalenceFadingOut, setIsEquivalenceFadingOut] = useState(false);
+
+	// Add new state for final continue button fade out
+	const [isFinalContinueFadingOut, setIsFinalContinueFadingOut] = useState(false);
+
+	// Add new states for the next continue button and final text
+	const [showSecondContinue, setShowSecondContinue] = useState(false);
+	const [isCalculationFadingOut, setIsCalculationFadingOut] = useState(false);
+	const [isSecondContinueFadingOut, setIsSecondContinueFadingOut] = useState(false);
+	const [showFinalText, setShowFinalText] = useState(false);
+
+	// Add new states for the third continue button and last text
+	const [showThirdContinue, setShowThirdContinue] = useState(false);
+	const [isFinalTextFadingOut, setIsFinalTextFadingOut] = useState(false);
+	const [isThirdContinueFadingOut, setIsThirdContinueFadingOut] = useState(false);
+	const [showLastText, setShowLastText] = useState(false);
+
+	// Add new state for delayed last text
+	const [showLastTextDelayed, setShowLastTextDelayed] = useState(false);
+
+	// Add new states for the "Solve Equation" button and fade-out
+	const [showSolveContinue, setShowSolveContinue] = useState(false);
+	const [isLastTextFadingOut, setIsLastTextFadingOut] = useState(false);
+	const [isSolveContinueFadingOut, setIsSolveContinueFadingOut] = useState(false);
+
+	// Add new state for showing the drag-and-drop equation
+	const [showSolveEquation, setShowSolveEquation] = useState(false);
+
+	// Add new states for drag-and-drop values
+	const [droppedEquation, setDroppedEquation] = useState({
+		Ma: null,
+		Va: null,
+		Vb: null
+	});
+
+	// Add new state for showing draggable values after solve button
+	const [showDraggableValues, setShowDraggableValues] = useState(false);
+
+	// Add these states for drag logic (similar to Annuity.jsx)
+	const [isDragging, setIsDragging] = useState(false);
+	const [draggedBoxId, setDraggedBoxId] = useState(null);
+	const [draggedBoxValue, setDraggedBoxValue] = useState(null);
+	const [draggedPosition, setDraggedPosition] = useState({ x: 0, y: 0 });
+	const [originalPosition, setOriginalPosition] = useState({ x: 0, y: 0 });
+
+	// Add this state to track original positions of draggable boxes
+	const [draggableBoxOrigins, setDraggableBoxOrigins] = useState({});
+	const [draggedBoxStyle, setDraggedBoxStyle] = useState({}); // For inline style during drag
+
+	// Add a state to track which drop zone is being hovered
+	const [dragOverZone, setDragOverZone] = useState(null);
+
+	// Add these refs near the top with other refs/state
+	const maDropRef = useRef(null);
+	const vaDropRef = useRef(null);
+	const vbDropRef = useRef(null);
+
+	// Helper to handle drag logic for each draggable box
+	useEffect(() => {
+		if (!showDraggableValues) return;
+
+		const draggableElements = document.querySelectorAll('.titration-draggable-box');
+		const newOrigins = {};
+
+		draggableElements.forEach(element => {
+			const id = element.getAttribute('data-id');
+			if (!draggableBoxOrigins[id]) {
+				const rect = element.getBoundingClientRect();
+				const parentRect = element.offsetParent.getBoundingClientRect();
+				newOrigins[id] = {
+					left: rect.left - parentRect.left,
+					top: rect.top - parentRect.top,
+				};
+			}
+			element.onmousedown = null;
+			dragElement(element, id);
+		});
+
+		if (Object.keys(newOrigins).length > 0) {
+			setDraggableBoxOrigins(prev => ({ ...prev, ...newOrigins }));
+		}
+	// eslint-disable-next-line
+	}, [showDraggableValues]);
+
+	function dragElement(element, boxId) {
+		let isDraggingBox = false;
+		let offsetX = 0;
+		let offsetY = 0;
+		let startX = 0;
+		let startY = 0;
+
+		const dragMouseDown = (e) => {
+			e.preventDefault();
+			const rect = element.getBoundingClientRect();
+			const parentRect = element.offsetParent.getBoundingClientRect();
+
+			startX = e.clientX;
+			startY = e.clientY;
+			offsetX = rect.left - parentRect.left;
+			offsetY = rect.top - parentRect.top;
+
+			setDraggedBoxStyle({
+				[boxId]: {
+					position: 'absolute',
+					left: offsetX,
+					top: offsetY,
+					zIndex: 1000,
+					transition: 'none',
+					width: element.offsetWidth,
+					height: element.offsetHeight,
+				}
+			});
+
+			document.onmouseup = closeDragElement;
+			document.onmousemove = elementDrag;
+			setIsDragging(true);
+			setDraggedBoxId(boxId);
+			setDraggedBoxValue(element.textContent);
+
+			element.classList.add('dragging');
+			isDraggingBox = true;
+		};
+
+		const elementDrag = (e) => {
+			e.preventDefault();
+			if (!isDraggingBox) return;
+			const newLeft = offsetX + (e.clientX - startX);
+			const newTop = offsetY + (e.clientY - startY);
+
+			setDraggedBoxStyle(prev => ({
+				...prev,
+				[boxId]: {
+					...prev[boxId],
+					left: newLeft,
+					top: newTop,
+					transition: 'none',
+				}
+			}));
+
+			// Check if mouse is over any drop zone
+			const mouseX = e.clientX;
+			const mouseY = e.clientY;
+			let overZone = null;
+			const dropZones = [
+				{ key: 'Ma', ref: maDropRef },
+				{ key: 'Va', ref: vaDropRef },
+				{ key: 'Vb', ref: vbDropRef }
+			];
+			for (const zone of dropZones) {
+				const rect = zone.ref.current?.getBoundingClientRect();
+				if (
+					rect &&
+					mouseX >= rect.left &&
+					mouseX <= rect.right &&
+					mouseY >= rect.top &&
+					mouseY <= rect.bottom
+				) {
+					overZone = zone.key;
+					break;
+				}
+			}
+			setDragOverZone(overZone);
+		};
+
+		const closeDragElement = () => {
+			document.onmouseup = null;
+			document.onmousemove = null;
+			setIsDragging(false);
+
+			const origin = draggableBoxOrigins[boxId];
+			if (origin) {
+				setDraggedBoxStyle(prev => ({
+					...prev,
+					[boxId]: {
+						...prev[boxId],
+						left: origin.left,
+						top: origin.top,
+						transition: 'left 0.2s, top 0.2s',
+					}
+				}));
+				setTimeout(() => {
+					setDraggedBoxStyle(prev => {
+						const updated = { ...prev };
+						delete updated[boxId];
+						return updated;
+					});
+					setDraggedBoxId(null);
+					setDraggedBoxValue(null);
+					isDraggingBox = false;
+				}, 200);
+			} else {
+				setDraggedBoxStyle(prev => {
+					const updated = { ...prev };
+					delete updated[boxId];
+					return updated;
+				});
+				setDraggedBoxId(null);
+				setDraggedBoxValue(null);
+				isDraggingBox = false;
+			}
+			setDragOverZone(null); // Reset on drag end
+		};
+
+		element.onmousedown = dragMouseDown;
+	}
+
 	// Handler functions
 	const handleReset = () => {
 		setIsAnimating(false);
@@ -90,6 +301,29 @@ const Titration = () => {
 		setIsButtonFadingOut(false);
 		setIsInstructionFadingOut(false);
 		setShowEquivalenceText(false);
+		setShowFinalContinue(false);
+		setShowCalculationText(false);
+		setIsEquivalenceFadingOut(false);
+		setIsFinalContinueFadingOut(false);
+		setShowSecondContinue(false);
+		setIsCalculationFadingOut(false);
+		setIsSecondContinueFadingOut(false);
+		setShowFinalText(false);
+		setShowThirdContinue(false);
+		setIsFinalTextFadingOut(false);
+		setIsThirdContinueFadingOut(false);
+		setShowLastText(false);
+		setShowLastTextDelayed(false);
+		setShowSolveContinue(false);
+		setIsLastTextFadingOut(false);
+		setIsSolveContinueFadingOut(false);
+		setShowSolveEquation(false);
+		setShowDraggableValues(false);
+		setDroppedEquation({
+			Ma: null,
+			Va: null,
+			Vb: null
+		});
 	};
 
 	const handleStart = () => {
@@ -175,6 +409,10 @@ const Titration = () => {
 						// Wait for burette animation to complete before showing text
 						setTimeout(() => {
 							setShowEquivalenceText(true);
+							// Show the final continue button after the equivalence text appears
+							setTimeout(() => {
+								setShowFinalContinue(true);
+							}, 500);
 						}, 800);
 					}, 1000);
 				}
@@ -183,6 +421,123 @@ const Titration = () => {
 			setClickCount(prevCount => prevCount + 1);
 		}
 	};
+
+	// Update handler for final continue button
+	const handleFinalContinue = () => {
+		setIsEquivalenceFadingOut(true);
+		setIsFinalContinueFadingOut(true); // Start button fade out
+		setTimeout(() => {
+			setShowEquivalenceText(false);
+			setShowFinalContinue(false);
+			// Delay the new text by 300ms (adjust as desired)
+			setTimeout(() => {
+				setShowCalculationText(true);
+				setIsEquivalenceFadingOut(false);
+				setIsFinalContinueFadingOut(false); // Reset for next time
+				// Show the new continue button after a short delay
+				setTimeout(() => {
+					setShowSecondContinue(true);
+				}, 500); // Adjust delay as needed
+			}, 300);
+		}, 300); // match fade-out duration
+	};
+
+	// Handler for the new continue button
+	const handleSecondContinue = () => {
+		setIsCalculationFadingOut(true);
+		setIsSecondContinueFadingOut(true);
+		setTimeout(() => {
+			setShowCalculationText(false);
+			setShowSecondContinue(false);
+			// Show the final text after a short delay
+			setTimeout(() => {
+				setShowFinalText(true);
+				setIsCalculationFadingOut(false);
+				setIsSecondContinueFadingOut(false);
+				// Show the third continue button after a short delay
+				setTimeout(() => {
+					setShowThirdContinue(true);
+				}, 500); // Adjust delay as needed
+			}, 300); // Adjust as needed for fade-in
+		}, 300); // match fade-out duration
+	};
+
+	// Handler for the third continue button
+	const handleThirdContinue = () => {
+		setIsFinalTextFadingOut(true);
+		setIsThirdContinueFadingOut(true);
+		setTimeout(() => {
+			setShowFinalText(false);
+			setShowThirdContinue(false);
+			// Show the last text after a short delay
+			setTimeout(() => {
+				setShowLastText(true);
+				setIsFinalTextFadingOut(false);
+				setIsThirdContinueFadingOut(false);
+				// Show the delayed text after 400ms (adjust as needed)
+				setTimeout(() => {
+					setShowLastTextDelayed(true);
+					// Show the "Solve Equation" button after another short delay
+					setTimeout(() => {
+						setShowSolveContinue(true);
+					}, 400); // Adjust as needed
+				}, 400);
+			}, 300); // Adjust as needed for fade-in
+		}, 300); // match fade-out duration
+	};
+
+	// Update handleSolveContinue to show draggable values after fade out
+	const handleSolveContinue = () => {
+		setIsLastTextFadingOut(true);
+		setIsSolveContinueFadingOut(true);
+		setTimeout(() => {
+			setShowLastTextDelayed(false);
+			setShowSolveContinue(false);
+			setIsLastTextFadingOut(false);
+			setIsSolveContinueFadingOut(false);
+			// Show the drag-and-drop equation after a short delay
+			setTimeout(() => {
+				setShowSolveEquation(true);
+				setShowDraggableValues(true); // Show draggable values
+			}, 300);
+		}, 300); // match fade-out duration
+	};
+
+	// Native drag-and-drop handlers for draggable boxes (for equation drop only)
+	const handleDragStart = (e, item) => {
+		e.dataTransfer.setData('text/plain', item.value);
+		setIsDragging(true);
+		setDraggedBoxId(item.id);
+	};
+	const handleDragEnd = () => {
+		setIsDragging(false);
+		setDragOverZone(null);
+		setDraggedBoxId(null);
+	};
+
+	// ... existing code ...
+// Update drop zone handlers for equation
+const handleEquationDragOver = (e, key) => {
+	e.preventDefault();
+	setDragOverZone(key);
+};
+const handleEquationDragLeave = (e, key) => {
+	setDragOverZone(null);
+};
+const handleEquationDrop = (e, key) => {
+	e.preventDefault();
+	const value = e.dataTransfer.getData('text/plain');
+	if (value) {
+		setDroppedEquation(prev => ({
+			...prev,
+			[key]: value
+		}));
+	}
+	setDragOverZone(null);
+	setIsDragging(false);
+	setDraggedBoxId(null);
+};
+// ... existing code ...
 
 	return (
 		<div className="w-[464px] mx-auto mt-5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.05)] bg-white rounded-lg select-none">
@@ -875,6 +1230,27 @@ const Titration = () => {
 							transform: translate(0, 0) rotate(45deg);
 						}
 					}
+
+					@keyframes expandOut {
+						0% {
+							opacity: 0;
+							transform: scale(0.2);
+						}
+						80% {
+							opacity: 1;
+							transform: scale(1.05);
+						}
+						100% {
+							opacity: 1;
+							transform: scale(1);
+						}
+					}
+					.expand-out {
+						animation: expandOut 0.35s cubic-bezier(0.4, 0.8, 0.2, 1) both;
+					}
+					.drop-zone.drag-over {
+						background: #ede9fe !important;
+					}
 				`}
 			</style>
 			<div className="p-4">
@@ -899,7 +1275,7 @@ const Titration = () => {
 									{showContinue && (
 										<>
 											<div className={`info-text fade-in ${isTextFadingOut ? 'fade-out' : ''}`}>
-												This indicator liquid will cause the flask's acidic solution's color to change once the solution becomes a neutral pH.
+												This indicator liquid will cause the flask's basic solution's color to change once the solution becomes a neutral pH.
 											</div>
 											<button
 												className={`continue-button fade-in ${isTextFadingOut ? 'fade-out' : ''}`}
@@ -995,7 +1371,7 @@ const Titration = () => {
 
 							{showInstructions && (
 								<div className={`info-text fade-in ${isInstructionFadingOut ? 'fade-out' : ''}`}>
-									Add drops of basic titrant into the acidic solution until a change in color is seen.
+									Add drops of acidic titrant into the basic solution until a change in color is seen.
 								</div>
 							)}
 
@@ -1010,9 +1386,442 @@ const Titration = () => {
 							)}
 
 							{showEquivalenceText && (
-								<div className={`info-text fade-in`}>
-									You've reached the equivalence point! Now let's calculate how acidic our starting solution was.
-								</div>
+								<>
+									<div className={`info-text fade-in${isEquivalenceFadingOut ? ' fade-out' : ''}`}>
+										The titration is complete now that the indicator changed color, showing we've reached an equivalence between the moles of acid and the moles of base.
+									</div>
+									{showFinalContinue && (
+										<button
+											className={`continue-button fade-in${isFinalContinueFadingOut ? ' button-fade-out' : ''}`}
+											style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
+											onClick={handleFinalContinue}
+											disabled={isFinalContinueFadingOut}
+										>
+											Continue
+										</button>
+									)}
+								</>
+							)}
+							{showCalculationText && (
+								<>
+									<div className={`info-text fade-in${isCalculationFadingOut ? ' fade-out' : ''}`}>
+										Knowing this, and the concentration or molarity of our standard solution, we can calculate the original Molarity of our unknown.
+									</div>
+									{showSecondContinue && (
+										<button
+											className={`continue-button fade-in${isSecondContinueFadingOut ? ' button-fade-out' : ''}`}
+											style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
+											onClick={handleSecondContinue}
+											disabled={isSecondContinueFadingOut}
+										>
+											Continue
+										</button>
+									)}
+								</>
+							)}
+							{showFinalText && (
+								<>
+									<div className={`info-text fade-in${isFinalTextFadingOut ? ' fade-out' : ''}`}>
+										To do this we are using the equation Molarity x Volume = Moles, because we know the moles of acid and moles of base are the same, we can write the equation MaVa = MbVb.
+									</div>
+									{showThirdContinue && (
+										<button
+											className={`continue-button fade-in${isThirdContinueFadingOut ? ' button-fade-out' : ''}`}
+											style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
+											onClick={handleThirdContinue}
+											disabled={isThirdContinueFadingOut}
+										>
+											Continue
+										</button>
+									)}
+								</>
+							)}
+							{showLastText && (
+								<>
+									<div
+										className="fade-in"
+										style={{
+											position: 'absolute',
+											bottom: '275px',
+											right: '4px',
+											zIndex: 10,
+										}}
+									>
+										<table className="text-xs border border-gray-300 rounded bg-white shadow">
+											<tbody>
+												<tr>
+													<td className="border px-2 py-0.5 font-medium bg-gray-50">Starting Solution Volume</td>
+													<td className="border px-2 py-0.5 text-center" id="drag-col-1">100mL</td>
+												</tr>
+												<tr>
+													<td className="border px-2 py-0.5 font-medium bg-gray-50">Starting Solution Moles</td>
+													<td className="border px-2 py-0.5 text-center" id="drag-col-2">?</td>
+												</tr>
+												<tr>
+													<td className="border px-2 py-0.5 font-medium bg-gray-50">Used Titrant Volume</td>
+													<td className="border px-2 py-0.5 text-center" id="drag-col-3">5mL</td>
+												</tr>
+												<tr>
+													<td className="border px-2 py-0.5 font-medium bg-gray-50">Titrant Moles</td>
+													<td className="border px-2 py-0.5 text-center" id="drag-col-4">0.5M</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									{/* Draggable values appear above the second column when showDraggableValues is true */}
+									{showDraggableValues && (
+										<>
+											{[
+												{ id: 'drag-4', value: '0.5M', col: 4 },
+												{ id: 'drag-3', value: '5mL', col: 3 },
+												{ id: 'drag-2', value: '?', col: 2 },
+												{ id: 'drag-1', value: '100mL', col: 1 }
+											].map((item, idx) => {
+												const defaultStyle = {
+													position: 'absolute',
+													bottom: `${276 + 21 * idx}px`,
+													right: '5px',
+													zIndex: 50,
+													width: '51px',
+													height: '20px',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													cursor: 'grab',
+													background: '#ede9fe',
+													color: '#7c3aed',
+													borderRadius: '4px',
+													fontWeight: 500,
+													fontSize: '0.75rem',
+													boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+													userSelect: 'none',
+													border: '2px dashed #7c3aed',
+													transition: isDragging && draggedBoxId === item.id ? 'none' : 'transform 0.2s',
+												};
+												const dragStyle = draggedBoxStyle[item.id]
+													? {
+														...defaultStyle,
+														...draggedBoxStyle[item.id],
+														bottom: undefined,
+														right: undefined,
+													}
+													: defaultStyle;
+												return (
+													<div
+														key={item.id}
+														data-id={item.id}
+														className="expand-out titration-draggable-box"
+														style={dragStyle}
+														onMouseDown={e => {
+															e.preventDefault();
+															const element = e.currentTarget;
+															const id = item.id;
+															// Start custom drag
+															const rect = element.getBoundingClientRect();
+															const parentRect = element.offsetParent.getBoundingClientRect();
+															let startX = e.clientX;
+															let startY = e.clientY;
+															let offsetX = rect.left - parentRect.left;
+															let offsetY = rect.top - parentRect.top;
+															setDraggedBoxStyle({
+																[id]: {
+																	position: 'absolute',
+																	left: offsetX,
+																	top: offsetY,
+																	zIndex: 1000,
+																	transition: 'none',
+																	width: element.offsetWidth,
+																	height: element.offsetHeight,
+																}
+															});
+															let isDraggingBox = true;
+															setIsDragging(true);
+															setDraggedBoxId(id);
+															setDraggedBoxValue(element.textContent);
+
+															const moveHandler = (moveEvent) => {
+																moveEvent.preventDefault();
+																if (!isDraggingBox) return;
+																const newLeft = offsetX + (moveEvent.clientX - startX);
+																const newTop = offsetY + (moveEvent.clientY - startY);
+																setDraggedBoxStyle(prev => ({
+																	...prev,
+																	[id]: {
+																		...prev[id],
+																		left: newLeft,
+																		top: newTop,
+																		transition: 'none',
+																	}
+																}));
+
+																// Check if mouse is over any drop zone
+																const mouseX = moveEvent.clientX;
+																const mouseY = moveEvent.clientY;
+																let overZone = null;
+																const dropZones = [
+																	{ key: 'Ma', ref: maDropRef },
+																	{ key: 'Va', ref: vaDropRef },
+																	{ key: 'Vb', ref: vbDropRef }
+																];
+																for (const zone of dropZones) {
+																	const rect = zone.ref.current?.getBoundingClientRect();
+																	if (
+																		rect &&
+																		mouseX >= rect.left &&
+																		mouseX <= rect.right &&
+																		mouseY >= rect.top &&
+																		mouseY <= rect.bottom
+																	) {
+																		overZone = zone.key;
+																		break;
+																	}
+																}
+																setDragOverZone(overZone);
+															};
+
+															const upHandler = (upEvent) => {
+																document.removeEventListener('mousemove', moveHandler);
+																document.removeEventListener('mouseup', upHandler);
+
+																// --- NEW: If dropped over a drop zone, update droppedEquation ---
+																const mouseX = upEvent.clientX;
+																const mouseY = upEvent.clientY;
+																const dropZones = [
+																	{ key: 'Ma', ref: maDropRef },
+																	{ key: 'Va', ref: vaDropRef },
+																	{ key: 'Vb', ref: vbDropRef }
+																];
+																let overZone = null;
+																for (const zone of dropZones) {
+																	const rect = zone.ref.current?.getBoundingClientRect();
+																	if (
+																		rect &&
+																		mouseX >= rect.left &&
+																		mouseX <= rect.right &&
+																		mouseY >= rect.top &&
+																		mouseY <= rect.bottom
+																	) {
+																		overZone = zone.key;
+																		break;
+																	}
+																}
+																if (overZone && element.textContent) {
+																	setDroppedEquation(prev => ({
+																		...prev,
+																		[overZone]: element.textContent
+																	}));
+																}
+
+																setIsDragging(false);
+																setDragOverZone(null);
+																setDraggedBoxId(null);
+																setDraggedBoxValue(null);
+																setDraggedBoxStyle(prev => {
+																	const updated = { ...prev };
+																	delete updated[id];
+																	return updated;
+																});
+																isDraggingBox = false;
+															};
+
+															document.addEventListener('mousemove', moveHandler);
+															document.addEventListener('mouseup', upHandler);
+														}}
+													>
+														{item.value}
+													</div>
+												);
+											})}
+										</>
+									)}
+									{showSolveEquation && (
+										<div
+											className="text-[11px] text-gray-500 mt-1 text-center w-full fade-in"
+											style={{
+												position: 'absolute',
+												bottom: '250px',
+												right: '-75px',
+												zIndex: 10,
+											}}
+										>
+											Drag the table values into the equation!
+										</div>
+									)}
+{showSolveEquation && (
+	<div
+		className="flex items-center font-mono text-lg select-none fade-in"
+		style={{
+			position: 'absolute',
+			bottom: '130px',
+			right: '-6px',
+			marginTop: 0,
+		}}
+	>
+		<span>Mb = </span>
+		<div
+			className="flex flex-col items-center mx-2"
+			style={{
+				transform: 'translateY(-5px)'
+			}}
+		>
+			<div className="border-b-2 border-black min-w-[120px] flex items-center justify-center py-2">
+				{/* Ma drop zone */}
+				<div
+					ref={maDropRef}
+					className={`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone`}
+					style={{
+						minHeight: '2rem',
+						background: isDragging ? '#ede9fe' : undefined,
+						transition: 'background 0.2s',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						position: 'relative',
+					}}
+				>
+					{droppedEquation.Ma ? (
+						<>
+							<span>{droppedEquation.Ma}</span>
+							<button
+								style={{
+									position: 'absolute',
+									right: 2,
+									top: 2,
+									background: 'none',
+									border: 'none',
+									color: '#aaa',
+									cursor: 'pointer',
+									fontSize: '1rem',
+									lineHeight: 1,
+									padding: 0
+								}}
+								onClick={e => {
+									e.stopPropagation();
+									setDroppedEquation(prev => ({ ...prev, Ma: null }));
+								}}
+								title="Remove"
+							>
+								×
+							</button>
+						</>
+					) : (
+						<span className="text-gray-400">Ma</span>
+					)}
+				</div>
+				<span className="mx-1">×</span>
+				{/* Va drop zone */}
+				<div
+					ref={vaDropRef}
+					className={`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone`}
+					style={{
+						minHeight: '2rem',
+						background: isDragging ? '#ede9fe' : undefined,
+						transition: 'background 0.2s',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						position: 'relative',
+					}}
+				>
+					{droppedEquation.Va ? (
+						<>
+							<span>{droppedEquation.Va}</span>
+							<button
+								style={{
+									position: 'absolute',
+									right: 2,
+									top: 2,
+									background: 'none',
+									border: 'none',
+									color: '#aaa',
+									cursor: 'pointer',
+									fontSize: '1rem',
+									lineHeight: 1,
+									padding: 0
+								}}
+								onClick={e => {
+									e.stopPropagation();
+									setDroppedEquation(prev => ({ ...prev, Va: null }));
+								}}
+								title="Remove"
+							>
+								×
+							</button>
+						</>
+					) : (
+						<span className="text-gray-400">Va</span>
+					)}
+				</div>
+			</div>
+			<div className="mt-1 min-w-[120px] text-center" style={{ display: 'flex', justifyContent: 'center' }}>
+				{/* Vb drop zone */}
+				<div
+					ref={vbDropRef}
+					className={`w-16 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone`}
+					style={{
+						minHeight: '2rem',
+						background: isDragging ? '#ede9fe' : undefined,
+						transition: 'background 0.2s',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						position: 'relative',
+					}}
+				>
+					{droppedEquation.Vb ? (
+						<>
+							<span>{droppedEquation.Vb}</span>
+							<button
+								style={{
+									position: 'absolute',
+									right: 2,
+									top: 2,
+									background: 'none',
+									border: 'none',
+									color: '#aaa',
+									cursor: 'pointer',
+									fontSize: '1rem',
+									lineHeight: 1,
+									padding: 0
+								}}
+								onClick={e => {
+									e.stopPropagation();
+									setDroppedEquation(prev => ({ ...prev, Vb: null }));
+								}}
+								title="Remove"
+							>
+								×
+							</button>
+						</>
+					) : (
+						<span className="text-gray-400">Vb</span>
+					)}
+				</div>
+			</div>
+		</div>
+	</div>
+)}
+									{showLastTextDelayed && (
+										<>
+											<div
+												className={`info-text fade-in${isLastTextFadingOut ? ' fade-out' : ''}`}
+												style={{ marginTop: '90px' }}
+											>
+												Three of the terms in this equation are known, so with a bit of algebra we can get Mb = (MaVa)/Vb.
+											</div>
+											{showSolveContinue && (
+												<button
+													className={`continue-button fade-in${isSolveContinueFadingOut ? ' button-fade-out' : ''}`}
+													style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
+													onClick={handleSolveContinue}
+													disabled={isSolveContinueFadingOut}
+												>
+													Solve Equation
+												</button>
+											)}
+										</>
+									)}
+								</>
 							)}
 						</div>
 					</div>
