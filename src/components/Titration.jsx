@@ -158,20 +158,26 @@ const Titration = () => {
 	const [isCalculatedValueFadingOut, setIsCalculatedValueFadingOut] = useState(false);
 	const [isVbFadingOut, setIsVbFadingOut] = useState(false);
 	const [isFractionBarFadingOut, setIsFractionBarFadingOut] = useState(false);
+	// Add new state for final value
 	const [showFinalValue, setShowFinalValue] = useState(false);
+
+	// Add new states for congratulatory text
+	const [showCongratsText, setShowCongratsText] = useState(false);
+	const [isCongratsFadingOut, setIsCongratsFadingOut] = useState(false);
 
 	// Add useEffect for fraction transformation animations
 	useEffect(() => {
 		if (showCalculatedValue) {
-			// Wait 2 seconds before starting the fade-out animations
 			const timer = setTimeout(() => {
 				setIsCalculatedValueFadingOut(true);
 				setIsVbFadingOut(true);
 				setIsFractionBarFadingOut(true);
 				
-				// After fade-out completes, show the final value
 				setTimeout(() => {
 					setShowFinalValue(true);
+					setTimeout(() => {
+						setShowCongratsText(true);
+					}, 1000);
 				}, 500);
 			}, 2000);
 			
@@ -393,6 +399,31 @@ const Titration = () => {
 		setIsVbFadingOut(false);
 		setIsFractionBarFadingOut(false);
 		setShowFinalValue(false);
+		setShowCongratsText(false);
+		setIsCongratsFadingOut(false);
+		// Add missing resets
+		setCorrectAnswerCount(0);
+		setDropZoneCorrect({
+			Ma: false,
+			Va: false,
+			Vb: false
+		});
+		setFlashDropZone({
+			Ma: false,
+			Va: false,
+			Vb: false
+		});
+		setFlashGreenDropZone({
+			Ma: false,
+			Va: false,
+			Vb: false
+		});
+		setDragOverZone(null);
+		setDraggedBoxStyle({});
+		setDraggableBoxOrigins({});
+		setIsDragging(false);
+		setDraggedBoxId(null);
+		setDraggedBoxValue(null);
 	};
 
 	const handleStart = () => {
@@ -1966,6 +1997,11 @@ const handleEquationDrop = (e, key) => {
 												</button>
 											)}
 										</>
+									)}
+									{showCongratsText && (
+										<div className={`info-text fade-in${isCongratsFadingOut ? ' fade-out' : ''}`}>
+											Congratulations! You've found the solution's molarity!
+										</div>
 									)}
 								</>
 							)}
