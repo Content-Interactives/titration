@@ -1598,7 +1598,7 @@ const handleEquationDrop = (e, key) => {
 										className="flex items-center font-mono text-lg select-none fade-in"
 										style={{
 											position: 'absolute',
-											bottom: '180px',
+											bottom: '200px',
 											left: '100px',
 											width: 320,
 											height: 70,
@@ -1731,24 +1731,25 @@ const handleEquationDrop = (e, key) => {
 									<div
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
-													position: 'absolute',
-											bottom: '100px',
-											left: '150px',
-													zIndex: 50,
-													width: '51px',
-													height: '20px',
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-													cursor: 'grab',
-													background: '#ede9fe',
-													color: '#7c3aed',
-													borderRadius: '4px',
-													fontWeight: 500,
-													fontSize: '0.75rem',
-													boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-													userSelect: 'none',
-													border: '2px dashed #7c3aed',
+											position: 'absolute',
+											bottom: '80px',
+											left: '165px',
+											zIndex: 50,
+											width: '100px',
+											height: '40px',
+											display: 'flex',
+											flexDirection: 'column',
+											alignItems: 'center',
+											justifyContent: 'center',
+											cursor: 'grab',
+											background: '#ede9fe',
+											color: '#7c3aed',
+											borderRadius: '4px',
+											fontWeight: 500,
+											fontSize: '0.75rem',
+											boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+											userSelect: 'none',
+											border: '2px dashed #7c3aed',
 											transition: isDragging && draggedBoxId === 'drag-1' ? 'none' : 'transform 0.2s',
 											...(draggedBoxStyle['drag-1'] || {})
 										}}
@@ -1903,22 +1904,24 @@ const handleEquationDrop = (e, key) => {
 															document.addEventListener('mouseup', upHandler);
 														}}
 													>
-										100mL
-													</div>
+										<div style={{ lineHeight: '1', textAlign: 'center' }}>100mL</div>
+										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Unknown Solution Volume</div>
+									</div>
 
 									{/* ? - Position to the right of flask, above 100mL */}
 									<div
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
-											style={{
-												position: 'absolute',
+										style={{
+											position: 'absolute',
 											bottom: '125px',
 											left: '150px',
 											zIndex: 50,
-											width: '51px',
-											height: '20px',
-												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
+											width: '100px',
+											height: '40px',
+											display: 'flex',
+											flexDirection: 'column',
+											alignItems: 'center',
+											justifyContent: 'center',
 											cursor: 'grab',
 											background: '#ede9fe',
 											color: '#7c3aed',
@@ -2060,7 +2063,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
@@ -2082,22 +2085,24 @@ const handleEquationDrop = (e, key) => {
 											document.addEventListener('mouseup', upHandler);
 										}}
 									>
-										?
-												</div>
+										<div style={{ lineHeight: '1', textAlign: 'center' }}>?</div>
+										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Unknown Solution Concentration</div>
+									</div>
 
 									{/* 5mL - Position to the right of burette */}
-												<div
+									<div
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
-													style={{
+										style={{
 											position: 'absolute',
 											bottom: '295px',
-											left: '120px',
+											left: '-13px',
 											zIndex: 50,
-											width: '51px',
-											height: '20px',
-														display: 'flex',
-														alignItems: 'center',
-														justifyContent: 'center',
+											width: '100px',
+											height: '40px',
+											display: 'flex',
+											flexDirection: 'column',
+											alignItems: 'center',
+											justifyContent: 'center',
 											cursor: 'grab',
 											background: '#ede9fe',
 											color: '#7c3aed',
@@ -2239,7 +2244,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
@@ -2261,22 +2266,25 @@ const handleEquationDrop = (e, key) => {
 											document.addEventListener('mouseup', upHandler);
 										}}
 									>
-										5mL
-																</div>
+										<div style={{ lineHeight: '1', textAlign: 'center' }}>5mL</div>
+										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Used Titrant</div>
+									</div>
 
 									{/* 0.5M - Position to the right of burette, above 5mL */}
 									<div
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
-																	style={{
+										style={{
 											position: 'absolute',
-											bottom: '270px',
-											left: '120px',
+											bottom: '250px',
+											left: '-13px',
 											zIndex: 50,
-											width: '51px',
-											height: '20px',
-																		display: 'flex',
-																		alignItems: 'center',
-																		justifyContent: 'center',
+											width: '100px',
+											height: '40px',
+											display: 'flex',
+											
+											flexDirection: 'column',
+											alignItems: 'center',
+											justifyContent: 'center',
 											cursor: 'grab',
 											background: '#ede9fe',
 											color: '#7c3aed',
@@ -2416,10 +2424,7 @@ const handleEquationDrop = (e, key) => {
 														setTimeout(() => {
 															setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
 															setTimeout(() => {
-																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
-																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
-																}, 150);
+																setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 															}, 150);
 														}, 150);
 													}
@@ -2440,8 +2445,9 @@ const handleEquationDrop = (e, key) => {
 											document.addEventListener('mouseup', upHandler);
 										}}
 									>
-										0.5M
-														</div>
+										<div style={{ lineHeight: '1', textAlign: 'center' }}>0.5M</div>
+										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Titrant Concentration</div>
+									</div>
 										</>
 									)}
 						</div>
