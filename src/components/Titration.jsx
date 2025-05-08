@@ -2267,7 +2267,7 @@ const handleEquationDrop = (e, key) => {
 										}}
 									>
 										<div style={{ lineHeight: '1', textAlign: 'center' }}>5mL</div>
-										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Used Titrant</div>
+										<div style={{ lineHeight: '1', textAlign: 'center', fontSize: '0.65rem' }}>Used Titrant Volume</div>
 									</div>
 
 									{/* 0.5M - Position to the right of burette, above 5mL */}
