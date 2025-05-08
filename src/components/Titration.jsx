@@ -76,16 +76,6 @@ const Titration = () => {
 	const [showSecondContinue, setShowSecondContinue] = useState(false);
 	const [isCalculationFadingOut, setIsCalculationFadingOut] = useState(false);
 	const [isSecondContinueFadingOut, setIsSecondContinueFadingOut] = useState(false);
-	const [showFinalText, setShowFinalText] = useState(false);
-
-	// Add new states for the third continue button and last text
-	const [showThirdContinue, setShowThirdContinue] = useState(false);
-	const [isFinalTextFadingOut, setIsFinalTextFadingOut] = useState(false);
-	const [isThirdContinueFadingOut, setIsThirdContinueFadingOut] = useState(false);
-	const [showLastText, setShowLastText] = useState(false);
-
-	// Add new state for delayed last text
-	const [showLastTextDelayed, setShowLastTextDelayed] = useState(false);
 
 	// Add new states for the "Solve Equation" button and fade-out
 	const [showSolveContinue, setShowSolveContinue] = useState(false);
@@ -164,6 +154,15 @@ const Titration = () => {
 	// Add new states for congratulatory text
 	const [showCongratsText, setShowCongratsText] = useState(false);
 	const [isCongratsFadingOut, setIsCongratsFadingOut] = useState(false);
+
+	// Add new state for tracking first click
+	const [isFirstClick, setIsFirstClick] = useState(true);
+
+	// Add new state for NaOH concentration
+	const [naohConcentration, setNaohConcentration] = useState(0.5);
+
+	// Add new state for showing the last text
+	const [showLastText, setShowLastText] = useState(false);
 
 	// Add useEffect for fraction transformation animations
 	useEffect(() => {
@@ -361,6 +360,8 @@ const Titration = () => {
 		setShowAddButton(false);
 		setClickCount(0);
 		setIsStopcockAnimating(false);
+		setNaohConcentration(0.5);
+		setIsFirstClick(true);
 		if (flaskLiquidRef.current) {
 			flaskLiquidRef.current.classList.remove('increased');
 			flaskLiquidRef.current.classList.remove('pink');
@@ -376,15 +377,6 @@ const Titration = () => {
 		setShowSecondContinue(false);
 		setIsCalculationFadingOut(false);
 		setIsSecondContinueFadingOut(false);
-		setShowFinalText(false);
-		setShowThirdContinue(false);
-		setIsFinalTextFadingOut(false);
-		setIsThirdContinueFadingOut(false);
-		setShowLastText(false);
-		setShowLastTextDelayed(false);
-		setShowSolveContinue(false);
-		setIsLastTextFadingOut(false);
-		setIsSolveContinueFadingOut(false);
 		setShowSolveEquation(false);
 		setShowDraggableValues(false);
 		setDroppedEquation({
@@ -401,6 +393,7 @@ const Titration = () => {
 		setShowFinalValue(false);
 		setShowCongratsText(false);
 		setIsCongratsFadingOut(false);
+		setShowLastText(false);
 		// Add missing resets
 		setCorrectAnswerCount(0);
 		setDropZoneCorrect({
@@ -477,6 +470,12 @@ const Titration = () => {
 			setBuretteLiquidHeight(prev => prev - 2);
 			setIsDropFalling(true);
 			
+			// Update concentration and first click state
+			setNaohConcentration(prev => prev - 0.1);
+			if (isFirstClick) {
+				setIsFirstClick(false);
+			}
+			
 			// If this is the 5th click, start the button and text fade out
 			if (clickCount === 4) {
 				setIsButtonFadingOut(true);
@@ -542,48 +541,22 @@ const Titration = () => {
 		}, 300); // match fade-out duration
 	};
 
-	// Handler for the new continue button
+	// Update handleSecondContinue to properly show table and equation
 	const handleSecondContinue = () => {
 		setIsCalculationFadingOut(true);
 		setIsSecondContinueFadingOut(true);
 		setTimeout(() => {
 			setShowCalculationText(false);
 			setShowSecondContinue(false);
-			// Show the final text after a short delay
-			setTimeout(() => {
-				setShowFinalText(true);
-				setIsCalculationFadingOut(false);
-				setIsSecondContinueFadingOut(false);
-				// Show the third continue button after a short delay
-				setTimeout(() => {
-					setShowThirdContinue(true);
-				}, 500); // Adjust delay as needed
-			}, 300); // Adjust as needed for fade-in
-		}, 300); // match fade-out duration
-	};
-
-	// Handler for the third continue button
-	const handleThirdContinue = () => {
-		setIsFinalTextFadingOut(true);
-		setIsThirdContinueFadingOut(true);
-		setTimeout(() => {
-			setShowFinalText(false);
-			setShowThirdContinue(false);
-			// Show the last text after a short delay
+			// Show the table and equation
 			setTimeout(() => {
 				setShowLastText(true);
-				setIsFinalTextFadingOut(false);
-				setIsThirdContinueFadingOut(false);
-				// Show the delayed text after 400ms (adjust as needed)
 				setTimeout(() => {
-					setShowLastTextDelayed(true);
-					// Show the "Solve Equation" button after another short delay
-					setTimeout(() => {
-						setShowSolveContinue(true);
-					}, 400); // Adjust as needed
-				}, 400);
-			}, 300); // Adjust as needed for fade-in
-		}, 300); // match fade-out duration
+					setShowSolveEquation(true);
+					setShowDraggableValues(true);
+				}, 300);
+			}, 300);
+		}, 300);
 	};
 
 	// Update handleSolveContinue to show draggable values after fade out
@@ -1430,8 +1403,7 @@ const handleEquationDrop = (e, key) => {
 									{showContinue && (
 										<>
 											<div className={`info-text fade-in ${isTextFadingOut ? 'fade-out' : ''}`}>
-												This indicator liquid will cause the flask's basic solution's color to change once the solution becomes a neutral pH.
-											</div>
+												Starting with an acidic solution, a pH indicator is added so we know when we've neutralized the acid.											</div>
 											<button
 												className={`continue-button fade-in ${isTextFadingOut ? 'fade-out' : ''}`}
 												onClick={handleContinue}
@@ -1452,6 +1424,7 @@ const handleEquationDrop = (e, key) => {
 
 							{/* Wrap burette components */}
 							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
+								<div className="text-xs text-gray-600 text-center" style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', width: '100%' }}>0.5M NaOH</div>
 								<div className="burette">
 									<div className="burette-body">
 										<div 
@@ -1526,7 +1499,10 @@ const handleEquationDrop = (e, key) => {
 
 							{showInstructions && (
 								<div className={`info-text fade-in ${isInstructionFadingOut ? 'fade-out' : ''}`}>
-									Add drops of acidic titrant into the basic solution until a change in color is seen.
+									{isFirstClick ? 
+										"We'll use a standard, basic solution of sodium hydroxide to gradually neutralize the acid." :
+										"Keep adding standard solution until the solution changes color."
+									}
 								</div>
 							)}
 
@@ -1543,7 +1519,7 @@ const handleEquationDrop = (e, key) => {
 							{showEquivalenceText && (
 								<>
 									<div className={`info-text fade-in${isEquivalenceFadingOut ? ' fade-out' : ''}`}>
-										The titration is complete now that the indicator changed color, showing we've reached an equivalence between the moles of acid and the moles of base.
+										When the indicator changes color, the solution is at a neutral pH. This means we now have equivalent moles of acid and base in the flask.
 									</div>
 									{showFinalContinue && (
 										<button
@@ -1560,7 +1536,7 @@ const handleEquationDrop = (e, key) => {
 							{showCalculationText && (
 								<>
 									<div className={`info-text fade-in${isCalculationFadingOut ? ' fade-out' : ''}`}>
-										Knowing this, and the concentration or molarity of our standard solution, we can calculate the original Molarity of our unknown.
+										Because we know the concentration of the standard solution and how much we added, we can calculate the unknown concentration of acid.
 									</div>
 									{showSecondContinue && (
 										<button
@@ -1574,25 +1550,7 @@ const handleEquationDrop = (e, key) => {
 									)}
 								</>
 							)}
-							{showFinalText && (
-								<>
-									<div className={`info-text fade-in${isFinalTextFadingOut ? ' fade-out' : ''}`}>
-										To do this we are using the equation Molarity x Volume = Moles, because we know the moles of acid and moles of base are the same, we can write the equation MaVa = MbVb.
-									</div>
-									{showThirdContinue && (
-										<button
-											className={`continue-button fade-in${isThirdContinueFadingOut ? ' button-fade-out' : ''}`}
-											style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
-											onClick={handleThirdContinue}
-											disabled={isThirdContinueFadingOut}
-										>
-											Continue
-										</button>
-									)}
-								</>
-							)}
 							{showLastText && (
-								<>
 									<div
 										className={`fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
@@ -1602,7 +1560,7 @@ const handleEquationDrop = (e, key) => {
 											zIndex: 10,
 										}}
 									>
-										<table className="text-xs border border-gray-300 rounded bg-white shadow">
+									{/* <table className="text-xs border border-gray-300 rounded bg-white shadow">
 											<tbody>
 												<tr>
 													<td className="border px-2 py-0.5 font-medium bg-gray-50">Starting Solution Volume</td>
@@ -1621,21 +1579,161 @@ const handleEquationDrop = (e, key) => {
 													<td className="border px-2 py-0.5 text-center" id="drag-col-4">0.5M</td>
 												</tr>
 											</tbody>
-										</table>
+									</table> */}
 									</div>
-									{/* Draggable values appear above the second column when showDraggableValues is true */}
+							)}
+							{showSolveEquation && (
+								<>
+									<div
+										className={`info-text fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
+									>
+										Drag the correct values into the equation!
+									</div>
+									{showCongratsText && (
+										<div className={`info-text fade-in ${isCongratsFadingOut ? 'fade-out' : ''}`}>
+											Well done! You've determined the concentration of the unknown solution.
+										</div>
+									)}
+									<div
+										className="flex items-center font-mono text-lg select-none fade-in"
+										style={{
+											position: 'absolute',
+											bottom: '180px',
+											left: '100px',
+											width: 320,
+											height: 70,
+											minWidth: 320,
+											maxWidth: 320,
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+											transition: 'width 0.2s, height 0.2s'
+										}}
+									>
+										<span style={{ flexShrink: 0 }}>M<sub>b</sub> = </span>
+										{showFinalValue ? (
+											<div className="fade-in" style={{ marginLeft: 8 }}>
+												0.025 M
+											</div>
+										) : (
+											<div
+												className="flex flex-col items-center"
+												style={{
+													transform: 'translateY(-5px)',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													minWidth: 150,
+													minHeight: 60,
+													height: 60,
+													boxSizing: 'border-box'
+												}}
+											>
+												<div className={`border-b-2 border-black flex items-center justify-center py-2 ${isFractionBarFadingOut ? 'fade-out' : ''}`} style={{ minWidth: 120, marginLeft: 15, marginRight: 15, marginBottom: 5 }}>
+													{!showCalculatedValue ? (
+														<>
+															<div
+																ref={maDropRef}
+																className={
+																	`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone` +
+																	(flashDropZone.Ma ? ' flash-yellow' : '') +
+																	(flashGreenDropZone.Ma ? ' flash-green' : '') +
+																	(dropZoneCorrect.Ma ? ' drop-zone-correct' : '')
+																}
+																style={{
+																	minHeight: '2rem',
+																	background: isDragging ? '#ede9fe' : undefined,
+																	transition: 'background 0.2s',
+																	display: 'flex',
+																	alignItems: 'center',
+																	justifyContent: 'center',
+																	position: 'relative',
+																}}
+															>
+																{droppedEquation.Ma ? (
+																	<>
+																		<span>{droppedEquation.Ma}</span>
+																	</>
+																) : (
+																	<span className="text-gray-400">M<sub>a</sub></span>
+																)}
+															</div>
+															<span className="mx-1">×</span>
+															<div
+																ref={vaDropRef}
+																className={
+																	`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone` +
+																	(flashDropZone.Va ? ' flash-yellow' : '') +
+																	(flashGreenDropZone.Va ? ' flash-green' : '') +
+																	(dropZoneCorrect.Va ? ' drop-zone-correct' : '')
+																}
+																style={{
+																	minHeight: '2rem',
+																	background: isDragging ? '#ede9fe' : undefined,
+																	transition: 'background 0.2s',
+																	display: 'flex',
+																	alignItems: 'center',
+																	justifyContent: 'center',
+																	position: 'relative',
+																}}
+															>
+																{droppedEquation.Va ? (
+																	<>
+																		<span>{droppedEquation.Va}</span>
+																	</>
+																) : (
+																	<span className="text-gray-400">V<sub>a</sub></span>
+																)}
+															</div>
+														</>
+													) : (
+														<div className={`fade-in ${isCalculatedValueFadingOut ? 'fade-out-down' : ''}`}>
+															2.5 mmol
+														</div>
+													)}
+												</div>
+												<div className="mt-1 text-center" style={{ display: 'flex', justifyContent: 'center', minWidth: 120 }}>
+													<div
+														ref={vbDropRef}
+														className={
+															`w-16 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone ${isVbFadingOut ? 'fade-out-up' : ''}` +
+															(flashDropZone.Vb ? ' flash-yellow' : '') +
+															(flashGreenDropZone.Vb ? ' flash-green' : '') +
+															(dropZoneCorrect.Vb ? ' drop-zone-correct' : '')
+														}
+														style={{
+															minHeight: '2rem',
+															background: isDragging ? '#ede9fe' : undefined,
+															transition: 'background 0.2s',
+															display: 'flex',
+															alignItems: 'center',
+															justifyContent: 'center',
+															position: 'relative',
+														}}
+													>
+														{droppedEquation.Vb ? (
+															<>
+																<span>{droppedEquation.Vb}</span>
+															</>
+														) : (
+															<span className="text-gray-400">V<sub>b</sub></span>
+														)}
+													</div>
+												</div>
+											</div>
+										)}
+									</div>
+								</>
+							)}
 									{showDraggableValues && showDraggableBoxes && (
 										<>
-											{[
-												{ id: 'drag-4', value: '0.5M', col: 4 },
-												{ id: 'drag-3', value: '5mL', col: 3 },
-												{ id: 'drag-2', value: '?', col: 2 },
-												{ id: 'drag-1', value: '100mL', col: 1 }
-											].map((item, idx) => {
-												const defaultStyle = {
+									{/* 100mL - Position to the right of flask */}
+									<div
+										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
+										style={{
 													position: 'absolute',
-													bottom: `${276 + 21 * idx}px`,
-													right: '5px',
+											bottom: '100px',
+											left: '150px',
 													zIndex: 50,
 													width: '51px',
 													height: '20px',
@@ -1651,27 +1749,14 @@ const handleEquationDrop = (e, key) => {
 													boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
 													userSelect: 'none',
 													border: '2px dashed #7c3aed',
-													transition: isDragging && draggedBoxId === item.id ? 'none' : 'transform 0.2s',
-												};
-												const dragStyle = draggedBoxStyle[item.id]
-													? {
-														...defaultStyle,
-														...draggedBoxStyle[item.id],
-														bottom: undefined,
-														right: undefined,
-													}
-													: defaultStyle;
-												return (
-													<div
-														key={item.id}
-														data-id={item.id}
-														className={`expand-out titration-draggable-box ${isTableFadingOut ? 'fade-out' : ''}`}
-														style={dragStyle}
+											transition: isDragging && draggedBoxId === 'drag-1' ? 'none' : 'transform 0.2s',
+											...(draggedBoxStyle['drag-1'] || {})
+										}}
+										data-id="drag-1"
 														onMouseDown={e => {
 															e.preventDefault();
 															const element = e.currentTarget;
-															const id = item.id;
-															// Start custom drag
+											const id = 'drag-1';
 															const rect = element.getBoundingClientRect();
 															const parentRect = element.offsetParent.getBoundingClientRect();
 															let startX = e.clientX;
@@ -1689,14 +1774,12 @@ const handleEquationDrop = (e, key) => {
 																	height: element.offsetHeight,
 																}
 															});
-															let isDraggingBox = true;
 															setIsDragging(true);
 															setDraggedBoxId(id);
-															setDraggedBoxValue(element.textContent);
+											setDraggedBoxValue('100mL');
 
 															const moveHandler = (moveEvent) => {
 																moveEvent.preventDefault();
-																if (!isDraggingBox) return;
 																const newLeft = offsetX + (moveEvent.clientX - startX);
 																const newTop = offsetY + (moveEvent.clientY - startY);
 																setDraggedBoxStyle(prev => ({
@@ -1738,7 +1821,6 @@ const handleEquationDrop = (e, key) => {
 																document.removeEventListener('mousemove', moveHandler);
 																document.removeEventListener('mouseup', upHandler);
 
-																// --- NEW: If dropped over a drop zone, update droppedEquation ---
 																const mouseX = upEvent.clientX;
 																const mouseY = upEvent.clientY;
 																const dropZones = [
@@ -1760,32 +1842,27 @@ const handleEquationDrop = (e, key) => {
 																		break;
 																	}
 																}
-																if (overZone && element.textContent) {
-																	// Check if correct
-																	if (element.textContent === correctAnswers[overZone]) {
-																		// Only increment if this drop zone wasn't already correct
+												if (overZone) {
+													if ('100mL' === correctAnswers[overZone]) {
 																		if (!dropZoneCorrect[overZone]) {
 																			setCorrectAnswerCount(prev => {
 																				const newCount = prev + 1;
-																				// Start table fade out when all answers are correct
 																				if (newCount === 3) {
 																					setTimeout(() => {
 																						setIsTableFadingOut(true);
 																						setShowDraggableBoxes(false);
-																						// Show calculated value after fade out completes
 																						setTimeout(() => {
 																							setShowCalculatedValue(true);
-																						}, 1000); // Wait for fade out to complete
-																					}, 1000); // 1 second delay before fade out
+																		}, 1000);
+																	}, 1000);
 																				}
 																				return newCount;
 																			});
 																		}
 																		setDroppedEquation(prev => ({
 																			...prev,
-																			[overZone]: element.textContent
+															[overZone]: '100mL'
 																		}));
-																		// Flash green twice, then mark as correct (removes grey outline)
 																		setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
 																		setTimeout(() => {
 																			setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
@@ -1798,7 +1875,6 @@ const handleEquationDrop = (e, key) => {
 																			}, 150);
 																		}, 150);
 																	} else {
-																		// Flash yellow twice
 																		setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																		setTimeout(() => {
 																			setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
@@ -1821,190 +1897,553 @@ const handleEquationDrop = (e, key) => {
 																	delete updated[id];
 																	return updated;
 																});
-																isDraggingBox = false;
 															};
 
 															document.addEventListener('mousemove', moveHandler);
 															document.addEventListener('mouseup', upHandler);
 														}}
 													>
-														{item.value}
+										100mL
 													</div>
-												);
-											})}
-										</>
-									)}
-									{showSolveEquation && (
-										<div
-											className={`text-[11px] text-gray-500 mt-1 text-center w-full fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
+
+									{/* ? - Position to the right of flask, above 100mL */}
+									<div
+										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 											style={{
 												position: 'absolute',
-												bottom: '250px',
-												right: '-75px',
-												zIndex: 10,
-											}}
-										>
-											Drag the table values into the equation!
-										</div>
-									)}
-									{showSolveEquation && (
-										<div
-											className="flex items-center font-mono text-lg select-none fade-in"
-											style={{
-												position: 'absolute',
-												bottom: '130px',
-												left: '100px',
-												width: 320,
-												height: 70,
-												minWidth: 320,
-												maxWidth: 320,
+											bottom: '125px',
+											left: '150px',
+											zIndex: 50,
+											width: '51px',
+											height: '20px',
 												display: 'flex',
 												alignItems: 'center',
 												justifyContent: 'center',
-												transition: 'width 0.2s, height 0.2s'
-											}}
-										>
-											<span style={{ flexShrink: 0 }}>Mb = </span>
-											{showFinalValue ? (
-												<div className="fade-in" style={{ marginLeft: 8 }}>
-													0.025 mol
+											cursor: 'grab',
+											background: '#ede9fe',
+											color: '#7c3aed',
+											borderRadius: '4px',
+											fontWeight: 500,
+											fontSize: '0.75rem',
+											boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+											userSelect: 'none',
+											border: '2px dashed #7c3aed',
+											transition: isDragging && draggedBoxId === 'drag-2' ? 'none' : 'transform 0.2s',
+											...(draggedBoxStyle['drag-2'] || {})
+										}}
+										data-id="drag-2"
+										onMouseDown={e => {
+											e.preventDefault();
+											const element = e.currentTarget;
+											const id = 'drag-2';
+											const rect = element.getBoundingClientRect();
+											const parentRect = element.offsetParent.getBoundingClientRect();
+											let startX = e.clientX;
+											let startY = e.clientY;
+											let offsetX = rect.left - parentRect.left;
+											let offsetY = rect.top - parentRect.top;
+											setDraggedBoxStyle({
+												[id]: {
+													position: 'absolute',
+													left: offsetX,
+													top: offsetY,
+													zIndex: 1000,
+													transition: 'none',
+													width: element.offsetWidth,
+													height: element.offsetHeight,
+												}
+											});
+											setIsDragging(true);
+											setDraggedBoxId(id);
+											setDraggedBoxValue('?');
+
+											const moveHandler = (moveEvent) => {
+												moveEvent.preventDefault();
+												const newLeft = offsetX + (moveEvent.clientX - startX);
+												const newTop = offsetY + (moveEvent.clientY - startY);
+												setDraggedBoxStyle(prev => ({
+													...prev,
+													[id]: {
+														...prev[id],
+														left: newLeft,
+														top: newTop,
+														transition: 'none',
+													}
+												}));
+
+												// Check if mouse is over any drop zone
+												const mouseX = moveEvent.clientX;
+												const mouseY = moveEvent.clientY;
+												let overZone = null;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												setDragOverZone(overZone);
+											};
+
+											const upHandler = (upEvent) => {
+												document.removeEventListener('mousemove', moveHandler);
+												document.removeEventListener('mouseup', upHandler);
+
+												const mouseX = upEvent.clientX;
+												const mouseY = upEvent.clientY;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												let overZone = null;
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												if (overZone) {
+													if ('?' === correctAnswers[overZone]) {
+														if (!dropZoneCorrect[overZone]) {
+															setCorrectAnswerCount(prev => {
+																const newCount = prev + 1;
+																if (newCount === 3) {
+																	setTimeout(() => {
+																		setIsTableFadingOut(true);
+																		setShowDraggableBoxes(false);
+																		setTimeout(() => {
+																			setShowCalculatedValue(true);
+																		}, 1000);
+																	}, 1000);
+																}
+																return newCount;
+															});
+														}
+														setDroppedEquation(prev => ({
+															...prev,
+															[overZone]: '?'
+														}));
+														setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setDropZoneCorrect(prev => ({ ...prev, [overZone]: true }));
+																}, 150);
+															}, 150);
+														}, 150);
+													} else {
+														setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																}, 150);
+															}, 150);
+														}, 150);
+													}
+												}
+
+												setIsDragging(false);
+												setDragOverZone(null);
+												setDraggedBoxId(null);
+												setDraggedBoxValue(null);
+												setDraggedBoxStyle(prev => {
+													const updated = { ...prev };
+													delete updated[id];
+													return updated;
+												});
+											};
+
+											document.addEventListener('mousemove', moveHandler);
+											document.addEventListener('mouseup', upHandler);
+										}}
+									>
+										?
 												</div>
-											) : (
+
+									{/* 5mL - Position to the right of burette */}
 												<div
-													className="flex flex-col items-center"
+										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 													style={{
-														transform: 'translateY(-5px)',
+											position: 'absolute',
+											bottom: '295px',
+											left: '120px',
+											zIndex: 50,
+											width: '51px',
+											height: '20px',
 														display: 'flex',
 														alignItems: 'center',
 														justifyContent: 'center',
-														minWidth: 150,
-														minHeight: 60,
-														height: 60,
-														boxSizing: 'border-box'
-													}}
-												>
-													<div className={`border-b-2 border-black flex items-center justify-center py-2 ${isFractionBarFadingOut ? 'fade-out' : ''}`} style={{ minWidth: 120, marginLeft: 15, marginRight: 15, marginBottom: 5 }}>
-														{!showCalculatedValue ? (
-															<>
-																<div
-																	ref={maDropRef}
-																	className={
-																		`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone` +
-																		(flashDropZone.Ma ? ' flash-yellow' : '') +
-																		(flashGreenDropZone.Ma ? ' flash-green' : '') +
-																		(dropZoneCorrect.Ma ? ' drop-zone-correct' : '')
-																	}
+											cursor: 'grab',
+											background: '#ede9fe',
+											color: '#7c3aed',
+											borderRadius: '4px',
+											fontWeight: 500,
+											fontSize: '0.75rem',
+											boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+											userSelect: 'none',
+											border: '2px dashed #7c3aed',
+											transition: isDragging && draggedBoxId === 'drag-3' ? 'none' : 'transform 0.2s',
+											...(draggedBoxStyle['drag-3'] || {})
+										}}
+										data-id="drag-3"
+										onMouseDown={e => {
+											e.preventDefault();
+											const element = e.currentTarget;
+											const id = 'drag-3';
+											const rect = element.getBoundingClientRect();
+											const parentRect = element.offsetParent.getBoundingClientRect();
+											let startX = e.clientX;
+											let startY = e.clientY;
+											let offsetX = rect.left - parentRect.left;
+											let offsetY = rect.top - parentRect.top;
+											setDraggedBoxStyle({
+												[id]: {
+													position: 'absolute',
+													left: offsetX,
+													top: offsetY,
+													zIndex: 1000,
+													transition: 'none',
+													width: element.offsetWidth,
+													height: element.offsetHeight,
+												}
+											});
+											setIsDragging(true);
+											setDraggedBoxId(id);
+											setDraggedBoxValue('5mL');
+
+											const moveHandler = (moveEvent) => {
+												moveEvent.preventDefault();
+												const newLeft = offsetX + (moveEvent.clientX - startX);
+												const newTop = offsetY + (moveEvent.clientY - startY);
+												setDraggedBoxStyle(prev => ({
+													...prev,
+													[id]: {
+														...prev[id],
+														left: newLeft,
+														top: newTop,
+														transition: 'none',
+													}
+												}));
+
+												// Check if mouse is over any drop zone
+												const mouseX = moveEvent.clientX;
+												const mouseY = moveEvent.clientY;
+												let overZone = null;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												setDragOverZone(overZone);
+											};
+
+											const upHandler = (upEvent) => {
+												document.removeEventListener('mousemove', moveHandler);
+												document.removeEventListener('mouseup', upHandler);
+
+												const mouseX = upEvent.clientX;
+												const mouseY = upEvent.clientY;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												let overZone = null;
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												if (overZone) {
+													if ('5mL' === correctAnswers[overZone]) {
+														if (!dropZoneCorrect[overZone]) {
+															setCorrectAnswerCount(prev => {
+																const newCount = prev + 1;
+																if (newCount === 3) {
+																	setTimeout(() => {
+																		setIsTableFadingOut(true);
+																		setShowDraggableBoxes(false);
+																		setTimeout(() => {
+																			setShowCalculatedValue(true);
+																		}, 1000);
+																	}, 1000);
+																}
+																return newCount;
+															});
+														}
+														setDroppedEquation(prev => ({
+															...prev,
+															[overZone]: '5mL'
+														}));
+														setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setDropZoneCorrect(prev => ({ ...prev, [overZone]: true }));
+																}, 150);
+															}, 150);
+														}, 150);
+													} else {
+														setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																}, 150);
+															}, 150);
+														}, 150);
+													}
+												}
+
+												setIsDragging(false);
+												setDragOverZone(null);
+												setDraggedBoxId(null);
+												setDraggedBoxValue(null);
+												setDraggedBoxStyle(prev => {
+													const updated = { ...prev };
+													delete updated[id];
+													return updated;
+												});
+											};
+
+											document.addEventListener('mousemove', moveHandler);
+											document.addEventListener('mouseup', upHandler);
+										}}
+									>
+										5mL
+																</div>
+
+									{/* 0.5M - Position to the right of burette, above 5mL */}
+									<div
+										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 																	style={{
-																		minHeight: '2rem',
-																		background: isDragging ? '#ede9fe' : undefined,
-																		transition: 'background 0.2s',
+											position: 'absolute',
+											bottom: '270px',
+											left: '120px',
+											zIndex: 50,
+											width: '51px',
+											height: '20px',
 																		display: 'flex',
 																		alignItems: 'center',
 																		justifyContent: 'center',
-																		position: 'relative',
-																	}}
-																>
-																	{droppedEquation.Ma ? (
-																		<>
-																			<span>{droppedEquation.Ma}</span>
-																		</>
-																	) : (
-																		<span className="text-gray-400">Ma</span>
-																	)}
-																</div>
-																<span className="mx-1">×</span>
-																<div
-																	ref={vaDropRef}
-																	className={
-																		`w-16 mx-1 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone` +
-																		(flashDropZone.Va ? ' flash-yellow' : '') +
-																		(flashGreenDropZone.Va ? ' flash-green' : '') +
-																		(dropZoneCorrect.Va ? ' drop-zone-correct' : '')
-																	}
-																	style={{
-																		minHeight: '2rem',
-																		background: isDragging ? '#ede9fe' : undefined,
-																		transition: 'background 0.2s',
-																		display: 'flex',
-																		alignItems: 'center',
-																		justifyContent: 'center',
-																		position: 'relative',
-																	}}
-																>
-																	{droppedEquation.Va ? (
-																		<>
-																			<span>{droppedEquation.Va}</span>
-																		</>
-																	) : (
-																		<span className="text-gray-400">Va</span>
-																	)}
-																</div>
-															</>
-														) : (
-															<div className={`fade-in ${isCalculatedValueFadingOut ? 'fade-out-down' : ''}`}>
-																2.5 mmol
-															</div>
-														)}
-													</div>
-													<div className="mt-1 text-center" style={{ display: 'flex', justifyContent: 'center', minWidth: 120 }}>
-														<div
-															ref={vbDropRef}
-															className={
-																`w-16 text-center border-2 border-dashed border-gray-400 rounded-md drop-zone ${isVbFadingOut ? 'fade-out-up' : ''}` +
-																(flashDropZone.Vb ? ' flash-yellow' : '') +
-																(flashGreenDropZone.Vb ? ' flash-green' : '') +
-																(dropZoneCorrect.Vb ? ' drop-zone-correct' : '')
-															}
-															style={{
-																minHeight: '2rem',
-																background: isDragging ? '#ede9fe' : undefined,
-																transition: 'background 0.2s',
-																display: 'flex',
-																alignItems: 'center',
-																justifyContent: 'center',
-																position: 'relative',
-															}}
-														>
-															{droppedEquation.Vb ? (
-																<>
-																	<span>{droppedEquation.Vb}</span>
-																</>
-															) : (
-																<span className="text-gray-400">Vb</span>
-															)}
+											cursor: 'grab',
+											background: '#ede9fe',
+											color: '#7c3aed',
+											borderRadius: '4px',
+											fontWeight: 500,
+											fontSize: '0.75rem',
+											boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+											userSelect: 'none',
+											border: '2px dashed #7c3aed',
+											transition: isDragging && draggedBoxId === 'drag-4' ? 'none' : 'transform 0.2s',
+											...(draggedBoxStyle['drag-4'] || {})
+										}}
+										data-id="drag-4"
+										onMouseDown={e => {
+											e.preventDefault();
+											const element = e.currentTarget;
+											const id = 'drag-4';
+											const rect = element.getBoundingClientRect();
+											const parentRect = element.offsetParent.getBoundingClientRect();
+											let startX = e.clientX;
+											let startY = e.clientY;
+											let offsetX = rect.left - parentRect.left;
+											let offsetY = rect.top - parentRect.top;
+											setDraggedBoxStyle({
+												[id]: {
+													position: 'absolute',
+													left: offsetX,
+													top: offsetY,
+													zIndex: 1000,
+													transition: 'none',
+													width: element.offsetWidth,
+													height: element.offsetHeight,
+												}
+											});
+											setIsDragging(true);
+											setDraggedBoxId(id);
+											setDraggedBoxValue('0.5M');
+
+											const moveHandler = (moveEvent) => {
+												moveEvent.preventDefault();
+												const newLeft = offsetX + (moveEvent.clientX - startX);
+												const newTop = offsetY + (moveEvent.clientY - startY);
+												setDraggedBoxStyle(prev => ({
+													...prev,
+													[id]: {
+														...prev[id],
+														left: newLeft,
+														top: newTop,
+														transition: 'none',
+													}
+												}));
+
+												// Check if mouse is over any drop zone
+												const mouseX = moveEvent.clientX;
+												const mouseY = moveEvent.clientY;
+												let overZone = null;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												setDragOverZone(overZone);
+											};
+
+											const upHandler = (upEvent) => {
+												document.removeEventListener('mousemove', moveHandler);
+												document.removeEventListener('mouseup', upHandler);
+
+												const mouseX = upEvent.clientX;
+												const mouseY = upEvent.clientY;
+												const dropZones = [
+													{ key: 'Ma', ref: maDropRef },
+													{ key: 'Va', ref: vaDropRef },
+													{ key: 'Vb', ref: vbDropRef }
+												];
+												let overZone = null;
+												for (const zone of dropZones) {
+													const rect = zone.ref.current?.getBoundingClientRect();
+													if (
+														rect &&
+														mouseX >= rect.left &&
+														mouseX <= rect.right &&
+														mouseY >= rect.top &&
+														mouseY <= rect.bottom
+													) {
+														overZone = zone.key;
+														break;
+													}
+												}
+												if (overZone) {
+													if ('0.5M' === correctAnswers[overZone]) {
+														if (!dropZoneCorrect[overZone]) {
+															setCorrectAnswerCount(prev => {
+																const newCount = prev + 1;
+																if (newCount === 3) {
+																	setTimeout(() => {
+																		setIsTableFadingOut(true);
+																		setShowDraggableBoxes(false);
+																		setTimeout(() => {
+																			setShowCalculatedValue(true);
+																		}, 1000);
+																	}, 1000);
+																}
+																return newCount;
+															});
+														}
+														setDroppedEquation(prev => ({
+															...prev,
+															[overZone]: '0.5M'
+														}));
+														setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashGreenDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setDropZoneCorrect(prev => ({ ...prev, [overZone]: true }));
+																}, 150);
+															}, 150);
+														}, 150);
+													} else {
+														setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+														setTimeout(() => {
+															setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+															setTimeout(() => {
+																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
+																setTimeout(() => {
+																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																}, 150);
+															}, 150);
+														}, 150);
+													}
+												}
+
+												setIsDragging(false);
+												setDragOverZone(null);
+												setDraggedBoxId(null);
+												setDraggedBoxValue(null);
+												setDraggedBoxStyle(prev => {
+													const updated = { ...prev };
+													delete updated[id];
+													return updated;
+												});
+											};
+
+											document.addEventListener('mousemove', moveHandler);
+											document.addEventListener('mouseup', upHandler);
+										}}
+									>
+										0.5M
 														</div>
-													</div>
-												</div>
-											)}
-										</div>
-									)}
-									{showLastTextDelayed && (
-										<>
-											<div
-												className={`info-text fade-in${isLastTextFadingOut ? ' fade-out' : ''}`}
-												style={{ marginTop: '90px' }}
-											>
-												Three of the terms in this equation are known, so with a bit of algebra we can get Mb = (MaVa)/Vb.
-											</div>
-											{showSolveContinue && (
-												<button
-													className={`continue-button fade-in${isSolveContinueFadingOut ? ' button-fade-out' : ''}`}
-													style={{ right: '-0.05rem', bottom: '-0.05rem', position: 'absolute' }}
-													onClick={handleSolveContinue}
-													disabled={isSolveContinueFadingOut}
-												>
-													Solve Equation
-												</button>
-											)}
 										</>
 									)}
-									{showCongratsText && (
-										<div className={`info-text fade-in${isCongratsFadingOut ? ' fade-out' : ''}`}>
-											Congratulations! You've found the solution's molarity!
-										</div>
-									)}
-								</>
-							)}
 						</div>
 					</div>
 				</div>
