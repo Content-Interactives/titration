@@ -1424,7 +1424,6 @@ const handleEquationDrop = (e, key) => {
 
 							{/* Wrap burette components */}
 							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
-								<div className="text-xs text-gray-600 text-center" style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', width: '100%' }}>0.5M NaOH</div>
 								<div className="burette">
 									<div className="burette-body">
 										<div 
