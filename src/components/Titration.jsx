@@ -1260,7 +1260,7 @@ const handleEquationDrop = (e, key) => {
 						position: absolute;
 						width: 30px;
 						height: 30px;
-						left: 24.5%;
+						left: 27.5%;
 						transform: translateX(-50%);
 						top: 80%;
 						z-index: 0;
@@ -1438,7 +1438,7 @@ const handleEquationDrop = (e, key) => {
 								<div className="burette" style={{
 									position: 'absolute',
 									top: '20%',
-									left: '21%',
+									left: '24%',
 									transform: 'translate(-50%, -50%)',
 									width: '100px',
 									height: '300px',
@@ -1525,28 +1525,28 @@ const handleEquationDrop = (e, key) => {
 								alt="Erlenmeyer Flask" 
 								style={{
 									position: 'absolute',
-									bottom: '-5%',
-									left: '-7%',
-									width: '160px',
-									height: '200px',
+									bottom: '2%',
+									left: '-.5%',
+									width: '120px',
+									height: '160px',
 									zIndex: 1
 								}}
 							/>
 							<div className="flask-liquid" ref={flaskLiquidRef} style={{
 								position: 'absolute',
-								bottom: '-0.5%',
-								left: '-20.2%',
-								width: '70%',
-								height: '82%',
-								transition: 'height 1s linear, background-color 1s ease',
-								borderRadius: '0 0 42% 42%',
-								backgroundColor: flaskColor,
-								animation: 'waveMotion 2s ease-in-out infinite',
-								overflow: 'hidden',
-								zIndex: 1,
-								transform: 'scale(0.34)',
-								transformOrigin: 'bottom center'
-							}}>
+									bottom: '5.2%',
+									left: '-16.2%',
+									width: '64%',
+									height: '80%',
+									transition: 'height 1s linear, background-color 1s ease',
+									borderRadius: '0 0 38% 38%',
+									backgroundColor: flaskColor,
+									animation: 'waveMotion 2s ease-in-out infinite',
+									overflow: 'hidden',
+									zIndex: 1,
+									transform: 'scale(0.3)',
+									transformOrigin: 'bottom center'
+								}}>
 								<svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
 									viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto" style={{
 										width: '125%',
