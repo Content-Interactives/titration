@@ -2180,9 +2180,9 @@ const handleEquationDrop = (e, key) => {
 										style={{
 											position: 'absolute',
 											bottom: '290px',
-											left: '75px', // Changed from -13px to 20px
+											left: '80px',
 											zIndex: 50,
-											width: '100px',
+											width: '80px',
 											height: '40px',
 											display: 'flex',
 											flexDirection: 'column',
@@ -2361,12 +2361,11 @@ const handleEquationDrop = (e, key) => {
 										style={{
 											position: 'absolute',
 											bottom: '248px',
-											left: '75px', // Changed from -13px to 20px
+											left: '75px',
 											zIndex: 50,
-											width: '100px',
+											width: '80px',
 											height: '40px',
 											display: 'flex',
-											
 											flexDirection: 'column',
 											alignItems: 'center',
 											justifyContent: 'center',
