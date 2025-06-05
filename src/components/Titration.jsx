@@ -1,4 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import buretStand from '../assets/buret_stand.svg';
+import erlenmeyerFlask from '../assets/erlenmeyer_flask.svg';
+import buretTube from '../assets/buret_tube.svg';
+import dropper from '../assets/dropper.svg';
+import droplet from '../assets/droplet.svg';
 
 const Titration = () => {
 	// Add new state for button fade
@@ -163,6 +168,9 @@ const Titration = () => {
 
 	// Add new state for showing the last text
 	const [showLastText, setShowLastText] = useState(false);
+
+	// Add new state for droplet visibility
+	const [showDroplet, setShowDroplet] = useState(false);
 
 	// Add useEffect for fraction transformation animations
 	useEffect(() => {
@@ -362,6 +370,7 @@ const Titration = () => {
 		setIsStopcockAnimating(false);
 		setNaohConcentration(0.5);
 		setIsFirstClick(true);
+		setFlaskColor('rgba(173, 216, 230, 0.7)'); // Reset flask color to blue
 		if (flaskLiquidRef.current) {
 			flaskLiquidRef.current.classList.remove('increased');
 			flaskLiquidRef.current.classList.remove('pink');
@@ -463,11 +472,15 @@ const Titration = () => {
 		}, 300);
 	};
 
+	// Add new state for flask color
+	const [flaskColor, setFlaskColor] = useState('rgba(173, 216, 230, 0.7)');
+
 	const handleAddClick = () => {
 		if (clickCount < 5 && !isAnimationInProgress) {
 			setIsAnimationInProgress(true);
 			setIsStopcockAnimating(true);
 			setBuretteLiquidHeight(prev => prev - 2);
+			setShowDroplet(true);
 			setIsDropFalling(true);
 			
 			// Update concentration and first click state
@@ -495,13 +508,12 @@ const Titration = () => {
 			// Reset the drop after it's done falling
 			setTimeout(() => {
 				setIsDropFalling(false);
+				setShowDroplet(false);
 				setIsAnimationInProgress(false);
 				
 				// Change color after the last drop and animate burette back up
 				if (clickCount === 4) {
-					if (flaskLiquidRef.current) {
-						flaskLiquidRef.current.classList.add('pink');
-					}
+					setFlaskColor('rgba(255, 192, 203, 0.7)');
 					// Wait a moment after color change before moving burette up
 					setTimeout(() => {
 						setIsBuretteSliding(false);
@@ -924,9 +936,10 @@ const handleEquationDrop = (e, key) => {
 
 					.burette-liquid {
 						position: absolute;
-						bottom: -20px;
-						left: 0;
-						width: 100%;
+						bottom: 0;
+						left: 50%;
+						transform: translateX(-50%);
+						width: 10px;
 						height: 80%;
 						background-color: rgba(173, 216, 230);
 						transition: height 0.2s linear;
@@ -1110,72 +1123,65 @@ const handleEquationDrop = (e, key) => {
 
 					.pipette {
 						position: absolute;
-						top: 70px;
-						left: 125px;
-						width: 20px;
-						height: 120px;
+						top: 5%;
+						left: 13%;
+						width: 100px;
+						height: 250px;
 						transform: rotate(45deg);
 						animation: pipetteEnter 0.5s ease-out forwards;
+						z-index: 100;
 					}
 
-					.pipette-bulb {
-						position: absolute;
-						top: 0;
-						left: 50%;
-						transform: translateX(-50%);
-						width: 15px;
-						height: 35px;
-						border: 2px solid #333;
-						border-radius: 20%;
-						background: white;
-						overflow: hidden;
-						background-color: #333;
-					}
-
-					.pipette-horizontal {
-						position: absolute;
-						top: 31px;
-						left: 50%;
-						transform: translateX(-50%);
-						width: 20px;
-						height: 4px;
-						background: #333;
-						z-index: 2;
-					}
-
-					.pipette-tube {
-						position: absolute;
-						top: 32px;
-						left: 50%;
-						transform: translateX(-50%);
-						width: 8px;
-						height: 75px;
-						border-left: 2px solid #333;
-						border-right: 2px solid #333;
-						background: white;
-						border-radius: 3px;
-						overflow: hidden;
-						z-index: 1;
+					.pipette img {
+						width: 100%;
+						height: 100%;
+						object-fit: contain;
 					}
 
 					.pipette-tube-liquid {
 						position: absolute;
-						bottom: 0;
-						left: 0;
-						width: 100%;
-						height: 70%;
+						bottom: 35.5%;
+						left: 39%;
+						width: 7.5%;
+						height: 23%;
 						background-color: rgba(160, 230, 103, 0.8);
 						transition: height 0.8s linear;
 						clip-path: polygon(
-							0 8%,
-							100% 0,
+							0 0%,
+							100% 0%,
 							100% 100%,
 							0 100%
 						);
+						transform: rotate(11.5deg);
+						border-radius: 2px 2px 35% 35%;
+						transform-origin: bottom center;
+					}
+
+					.pipette-tube-liquid-thin {
+						position: absolute;
+						bottom: 30.5%;
+						left: 39%;
+						width: 2.5%;
+						height: 5.59%;
+						background-color: rgba(160, 230, 103, 0.8);
+						transition: height 0.8s linear;
+						clip-path: polygon(
+							0 0%,
+							100% 0%,
+							100% 100%,
+							0 100%
+						);
+						transform: rotate(11.5deg);
+						border-radius: 0px 0px 2px 2px;
+						transform-origin: bottom center;
 					}
 
 					.pipette-tube-liquid.draining {
-						height: 0%;
+						height: 11.5%;
+					}
+
+					.pipette-tube-liquid-thin.draining {
+						height: 2.8%;
 					}
 
 					.continue-button {
@@ -1202,8 +1208,8 @@ const handleEquationDrop = (e, key) => {
 
 					.vertical-line {
 						position: absolute;
-						top: 160px;
-						left: 101px;
+						top: 170px;
+						left: 55px;
 						width: 3px;
 						height: 0;
 						background-color: rgba(160, 230, 103, 0.8);
@@ -1214,13 +1220,13 @@ const handleEquationDrop = (e, key) => {
 					}
 
 					.vertical-line.show {
-						height: 120px;
+						height: 190px;
 					}
 
 					.vertical-line.shrink {
 						transform-origin: bottom;
 						height: 0;
-						top: 280px; /* This should be top (160px) + height (120px) */
+						top: 330px;
 						transition: height 0.5s linear, top 0.5s linear;
 					}
 
@@ -1230,11 +1236,11 @@ const handleEquationDrop = (e, key) => {
 
 					@keyframes pipetteExit {
 						0% {
-							transform: translate(0, 0);
+							transform: translate(0, 0) rotate(45deg);
 							opacity: 1;
 						}
 						100% {
-							transform: translate(50px, -50px);
+							transform: translate(50px, -50px) rotate(45deg);
 							opacity: 0;
 						}
 					}
@@ -1252,13 +1258,11 @@ const handleEquationDrop = (e, key) => {
 
 					.drop {
 						position: absolute;
-						width: 3px;
-						height: 25px;
-						background-color: rgba(173, 216, 230);
-						border-radius: 50%;
-						left: 50%;
-						transform: translateX(-48%);
-						top: 60%;
+						width: 30px;
+						height: 30px;
+						left: 24.5%;
+						transform: translateX(-50%);
+						top: 80%;
 						z-index: 0;
 					}
 
@@ -1268,11 +1272,11 @@ const handleEquationDrop = (e, key) => {
 
 					@keyframes dropFall {
 						0% {
-							transform: translateX(-50%) translateY(0);
+							transform: translateX(-50%) translateY(0) scale(0.8);
 							opacity: 1;
 						}
 						100% {
-							transform: translateX(-50%) translateY(200px);
+							transform: translateX(-50%) translateY(200px) scale(0.8);
 							opacity: 0;
 						}
 					}
@@ -1416,59 +1420,145 @@ const handleEquationDrop = (e, key) => {
 							)}
 							
 							{/* Add base and stand structure */}
-							<div className="base" />
-							<div className="stand" />
-							<div className={`burette-holder ${isBuretteSliding ? 'slide-down' : ''}`}>
-								<div className="burette-clamp" />
-							</div>
+							<img 
+								src={buretStand} 
+								alt="Buret Stand" 
+								style={{
+									position: 'absolute',
+									bottom: '-10%',
+									left: '-40%',
+									width: '400px',
+									height: '500px',
+									zIndex: 1
+								}}
+							/>
 
 							{/* Wrap burette components */}
 							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
-								<div className="burette">
-									<div className="burette-body">
-										<div 
-											className="burette-liquid" 
-											style={{ height: `${buretteLiquidHeight}%` }}
+								<div className="burette" style={{
+									position: 'absolute',
+									top: '20%',
+									left: '21%',
+									transform: 'translate(-50%, -50%)',
+									width: '100px',
+									height: '300px',
+									zIndex: 2
+								}}>
+									<img 
+										src={buretTube} 
+										alt="Buret Tube" 
+										style={{
+											position: 'absolute',
+											width: '100%',
+											height: '100%',
+											zIndex: 2
+										}}
+									/>
+									<div className="burette-liquid" style={{
+										position: 'absolute',
+										bottom: '28%',
+										left: '50%',
+										transform: 'translateX(-50%)',
+										width: '10px',
+										height: `${buretteLiquidHeight}%`,
+										backgroundColor: 'rgba(173, 216, 230, 0.7)',
+										transition: 'height 1s linear',
+										zIndex: 1
+									}} />
+									<div className="burette-thin-section" style={{
+										position: 'absolute',
+										bottom: '-3%',
+										left: '50%',
+										transform: 'translateX(-50%)',
+										width: '5px',
+										height: '75px',
+										border: '4px none #FFFFFF',
+										borderTop: 'none',
+										borderBottom: 'none',
+										background: 'none',
+										overflow: 'hidden',
+										borderRadius: '0px 0px 2px 2px',
+										zIndex: 1
+									}}>
+										<div className="burette-thin-liquid" style={{
+											position: 'absolute',
+											bottom: '10%',
+											left: '0%',
+											width: '100%',
+											height: `${buretteLiquidHeight}%`,
+											backgroundColor: 'rgba(173, 216, 230, 0.7)',
+											transition: 'height 1s linear',
+											zIndex: 1,
+											borderRadius: '0 0 50% 50%'
+										}} />
+									</div>
+									<div style={{
+										position: 'absolute',
+										bottom: '26%',
+										left: '50%',
+										transform: 'translateX(-50%)',
+										width: '6px',
+										height: `6px`,
+										backgroundColor: 'rgba(173, 216, 230, 0.7)',
+										transition: 'height 1s linear',
+										zIndex: 1,
+									}} />
+								</div>
+								{showDroplet && (
+									<div className={`drop ${isDropFalling ? 'falling' : ''}`}>
+										<img 
+											src={droplet} 
+											alt="Droplet" 
+											style={{
+												width: '100%',
+												height: '100%',
+												filter: 'brightness(1.2) saturate(1.2)'
+											}}
 										/>
 									</div>
-									<div className="burette-thin-section">
-										<div className="burette-thin-liquid" />
-									</div>
-									<div className="stopcock">
-										<div className="stopcock-horizontal" />
-										<div className={`stopcock-tip ${isStopcockAnimating ? 'shrink' : ''}`} />
-										<div className="stopcock-valve" />
-									</div>
-								</div>
-								<div className={`drop ${isDropFalling ? 'falling' : ''}`}></div>
+								)}
 							</div>
 							
 							{/* Existing Erlenmeyer Flask */}
-							<div className="erlenmeyer-flask">
-								<div className="erlenmeyer-neck" />
-								<div className="erlenmeyer-body">
-									<div className="flask-outline">
-										<div className="flask-side-left" />
-										<div className="flask-side-right" />
-										<div className="flask-bottom" />
-										<div className="flask-curve-left" />
-										<div className="flask-curve-right" />
-									</div>
-									<div className="flask-liquid" ref={flaskLiquidRef}>
-										<svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
-											viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto">
-											<defs>
-												<path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-											</defs>
-											<g className="parallax">
-												<use xlinkHref="#gentle-wave" x="48" y="0" fill="rgba(255,205,210,0.7)" />
-												<use xlinkHref="#gentle-wave" x="48" y="3" fill="rgba(255,205,210,0.5)" />
-												<use xlinkHref="#gentle-wave" x="48" y="5" fill="rgba(255,205,210,0.3)" />
-												<use xlinkHref="#gentle-wave" x="48" y="7" fill="rgba(255,205,210,1)" />
-											</g>
-										</svg>
-									</div>
-								</div>
+							<img 
+								src={erlenmeyerFlask} 
+								alt="Erlenmeyer Flask" 
+								style={{
+									position: 'absolute',
+									bottom: '-5%',
+									left: '-7%',
+									width: '160px',
+									height: '200px',
+									zIndex: 1
+								}}
+							/>
+							<div className="flask-liquid" ref={flaskLiquidRef} style={{
+								position: 'absolute',
+								bottom: '-0.5%',
+								left: '-20.2%',
+								width: '70%',
+								height: '82%',
+								transition: 'height 1s linear, background-color 1s ease',
+								borderRadius: '0 0 42% 42%',
+								backgroundColor: flaskColor,
+								animation: 'waveMotion 2s ease-in-out infinite',
+								overflow: 'hidden',
+								zIndex: 1,
+								transform: 'scale(0.34)',
+								transformOrigin: 'bottom center'
+							}}>
+								<svg className="waves" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+									viewBox="0 24 150 28" preserveAspectRatio="none" shapeRendering="auto" style={{
+										width: '125%',
+										height: '125%',
+										position: 'absolute',
+										left: '-12.5%',
+										top: '-12.5%'
+									}}>
+									<defs>
+										<path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+									</defs>
+								</svg>
 							</div>
 
 							{!isExpanded && (
@@ -1484,14 +1574,10 @@ const handleEquationDrop = (e, key) => {
 							{showPipette && (
 								<>
 									<div className={`vertical-line ${showGreenLine ? 'show' : ''} ${isLineShrinking ? 'shrink' : ''}`}></div>
-									<div className={`fade-in ${isPipetteExiting ? 'pipette-exit' : ''}`} style={{ position: 'absolute' }}>
-										<div className="pipette">
-											<div className="pipette-bulb"></div>
-											<div className="pipette-horizontal"></div>
-											<div className="pipette-tube">
-												<div className={`pipette-tube-liquid ${isPipetteDraining ? 'draining' : ''}`}></div>
-											</div>
-										</div>
+									<div className={`pipette ${isPipetteExiting ? 'pipette-exit' : ''}`}>
+										<img src={dropper} alt="Dropper" />
+										<div className={`pipette-tube-liquid ${isPipetteDraining ? 'draining' : ''}`} />
+										<div className="pipette-tube-liquid-thin" />
 									</div>
 								</>
 							)}
@@ -1731,8 +1817,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '80px',
-											left: '165px',
+											bottom: '60px',
+											left: '100px', // Changed from 165px to 120px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
@@ -1912,8 +1998,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '125px',
-											left: '150px',
+											bottom: '103px',
+											left: '90px', // Changed from 150px to 120px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
@@ -2093,8 +2179,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '295px',
-											left: '-13px',
+											bottom: '290px',
+											left: '75px', // Changed from -13px to 20px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
@@ -2274,8 +2360,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '250px',
-											left: '-13px',
+											bottom: '248px',
+											left: '75px', // Changed from -13px to 20px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
