@@ -1124,7 +1124,7 @@ const handleEquationDrop = (e, key) => {
 					.pipette {
 						position: absolute;
 						top: 5%;
-						left: 13%;
+						left: 21%;
 						width: 100px;
 						height: 250px;
 						transform: rotate(45deg);
@@ -1209,7 +1209,7 @@ const handleEquationDrop = (e, key) => {
 					.vertical-line {
 						position: absolute;
 						top: 170px;
-						left: 55px;
+						left: 23%;
 						width: 3px;
 						height: 0;
 						background-color: rgba(160, 230, 103, 0.8);
@@ -1260,9 +1260,9 @@ const handleEquationDrop = (e, key) => {
 						position: absolute;
 						width: 30px;
 						height: 30px;
-						left: 27.5%;
+						left: 43.5%;
 						transform: translateX(-50%);
-						top: 80%;
+						top: 95%;
 						z-index: 0;
 					}
 
@@ -1426,10 +1426,11 @@ const handleEquationDrop = (e, key) => {
 								style={{
 									position: 'absolute',
 									bottom: '-10%',
-									left: '-40%',
-									width: '400px',
+									left: '-35%',
+									width: '500px',
 									height: '500px',
-									zIndex: 1
+									zIndex: 1,
+									objectFit: 'cover'
 								}}
 							/>
 
@@ -1437,8 +1438,8 @@ const handleEquationDrop = (e, key) => {
 							<div className={`burette-container ${isBuretteSliding ? 'slide-down' : ''}`}>
 								<div className="burette" style={{
 									position: 'absolute',
-									top: '20%',
-									left: '24%',
+									top: '40%',
+									left: '40%',
 									transform: 'translate(-50%, -50%)',
 									width: '100px',
 									height: '300px',
@@ -1526,8 +1527,8 @@ const handleEquationDrop = (e, key) => {
 								style={{
 									position: 'absolute',
 									bottom: '2%',
-									left: '-.5%',
-									width: '120px',
+									left: '4%',
+									width: '140px',
 									height: '160px',
 									zIndex: 1
 								}}
@@ -1535,8 +1536,8 @@ const handleEquationDrop = (e, key) => {
 							<div className="flask-liquid" ref={flaskLiquidRef} style={{
 								position: 'absolute',
 									bottom: '5.2%',
-									left: '-16.2%',
-									width: '64%',
+									left: '-13.2%',
+									width: '72.5%',
 									height: '80%',
 									transition: 'height 1s linear, background-color 1s ease',
 									borderRadius: '0 0 38% 38%',
