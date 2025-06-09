@@ -404,7 +404,6 @@ const Titration = () => {
 		setShowCongratsText(false);
 		setIsCongratsFadingOut(false);
 		setShowLastText(false);
-		// Add missing resets
 		setCorrectAnswerCount(0);
 		setDropZoneCorrect({
 			Ma: false,
@@ -427,6 +426,14 @@ const Titration = () => {
 		setIsDragging(false);
 		setDraggedBoxId(null);
 		setDraggedBoxValue(null);
+		setIsGlowStopped(false);
+		setIsAnimationInProgress(false);
+		setShowDroplet(false);
+		setIsDropFalling(false);
+		setShowAllCorrectContinue(false);
+		setIsLastTextFadingOut(false);
+		setIsSolveContinueFadingOut(false);
+		setShowSolveContinue(false);
 	};
 
 	const handleStart = () => {
@@ -2295,7 +2302,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
@@ -2476,7 +2483,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
@@ -2657,7 +2664,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
