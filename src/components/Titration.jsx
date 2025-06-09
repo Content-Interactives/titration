@@ -1684,7 +1684,7 @@ const handleEquationDrop = (e, key) => {
 										className="flex items-center font-mono text-lg select-none fade-in"
 										style={{
 											position: 'absolute',
-											bottom: '200px',
+											bottom: '150px',
 											left: '100px',
 											width: 320,
 											height: 70,
@@ -1818,8 +1818,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '60px',
-											left: '100px', // Changed from 165px to 120px
+											bottom: '52px',
+											left: '130px', // Changed from 165px to 120px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
@@ -1999,8 +1999,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '103px',
-											left: '90px', // Changed from 150px to 120px
+											bottom: '95px',
+											left: '130px', // Changed from 150px to 120px
 											zIndex: 50,
 											width: '100px',
 											height: '40px',
@@ -2180,8 +2180,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '290px',
-											left: '80px',
+											bottom: '280px',
+											left: '110px',
 											zIndex: 50,
 											width: '80px',
 											height: '40px',
@@ -2361,8 +2361,8 @@ const handleEquationDrop = (e, key) => {
 										className={`expand-out titration-draggable-box fade-in ${isTableFadingOut ? 'fade-out' : ''}`}
 										style={{
 											position: 'absolute',
-											bottom: '248px',
-											left: '75px',
+											bottom: '237px',
+											left: '110px',
 											zIndex: 50,
 											width: '80px',
 											height: '40px',
