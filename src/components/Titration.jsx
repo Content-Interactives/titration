@@ -629,7 +629,7 @@ const handleEquationDrop = (e, key) => {
 			<style>
 				{`
 					.reset-button {
-						background-color: #00783E;
+						background-color: #6B7280;
 						color: white;
 						border: none;
 						border-radius: 0.25rem;
@@ -646,7 +646,7 @@ const handleEquationDrop = (e, key) => {
 						line-height: 1;
 					}
 					.reset-button:hover {
-						background-color: #006633;
+						background-color: #4B5563;
 					}
 					.erlenmeyer-flask {
 						position: absolute;
@@ -1059,7 +1059,7 @@ const handleEquationDrop = (e, key) => {
 					}
 
 					.explore-button {
-						background-color: #00783E;
+						background-color: #008545;
 						color: white;
 						border: none;
 						border-radius: 0.5rem;
@@ -1185,7 +1185,7 @@ const handleEquationDrop = (e, key) => {
 					}
 
 					.continue-button {
-						background-color: #00783E;
+						background-color: #008545;
 						color: white;
 						border: none;
 						border-radius: 0.5rem;
@@ -1388,7 +1388,7 @@ const handleEquationDrop = (e, key) => {
 			<div className="p-4">
 				{/* Title and Reset Button */}
 				<div className="flex justify-between items-center mb-4">
-					<h2 className="text-[#00783E] text-sm font-medium select-none">Titration Simulator</h2>
+					<h2 className="text-[#4E48CC] text-sm font-medium select-none">Titration Simulator</h2>
 					<button 
 						className="reset-button"
 						onClick={handleReset}
@@ -1400,7 +1400,7 @@ const handleEquationDrop = (e, key) => {
 
 				<div className="space-y-4">
 					{/* Main interactive container */}
-					<div className="w-[400px] h-[400px] mx-auto bg-white border border-[#00783E]/30 rounded-md overflow-hidden relative p-4">
+					<div className="w-[400px] h-[400px] mx-auto bg-white border border-[#7973E9]/30 rounded-md overflow-hidden relative p-4">
 						<div className="relative h-full">
 							{isExpanded && (
 								<>
