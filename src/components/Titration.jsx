@@ -1458,7 +1458,7 @@ const handleEquationDrop = (e, key) => {
 				<div className="flex justify-between items-center mb-4">
 					<h2 className="text-[#4E48CC] text-sm font-medium select-none">Titration Simulator</h2>
 					<button 
-						className="reset-button"
+						className="text-gray-500 hover:text-gray-700 text-sm px-3 py-1 rounded border border-gray-300 hover:border-gray-400 transition-colors"
 						onClick={handleReset}
 						title="Reset interactive"
 					>
@@ -2121,7 +2121,7 @@ const handleEquationDrop = (e, key) => {
 															setTimeout(() => {
 																setFlashDropZone(prev => ({ ...prev, [overZone]: true }));
 																setTimeout(() => {
-																	setFlashDropZone(prev => ({ ...prev, [overZone]: false }));
+																	setFlashGreenDropZone(prev => ({ ...prev, [overZone]: false }));
 																}, 150);
 															}, 150);
 														}, 150);
