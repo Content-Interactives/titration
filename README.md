@@ -1,14 +1,41 @@
-Link to Github interactive: https://content-interactives.github.io/titration/
+# Titration
 
-# React + Vite
+The **Titration** interactive demonstrates how titration is used to determine the concentration of a solution. Students can explore how adding a titrant affects the reaction and identify the equivalence point.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+## 🔗 Live Interactive
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Try it out here:  
+👉 [https://content-interactives.github.io/titration](https://content-interactives.github.io/titration)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🌐 Where This Interactive Is Being Used
+
+This interactive is currently featured in the following locations:
+
+- <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/5d12571f-8e12-4441-98ab-c0bc94069a96" /> **CK-12 Intent Response**  
+  - 👉 PRODUCTION: PENDING  
+  - 👉 MASTER: PENDING  
+- 📘 **CK-12 Flexbooks**
+  - 👉 PENDING
+
+---
+
+## 📚 Standards & Subjects
+
+This interactive aligns with the following topics and standards:
+
+- **📂 Subject Area**: High School Science (Chemistry)  
+- **🧪 Topic**: Chemical Reactions – Titration  
+- **📏 NGSS**:  
+  - HS-PS1-2 – Construct and revise an explanation for the outcome of a simple chemical reaction based on the outermost electron states of atoms, trends in the periodic table, and knowledge of chemical properties.  
+  - HS-PS1-7 – Use mathematical representations to support the claim that atoms, and therefore mass, are conserved during a chemical reaction.
+
+---
+
+## 🛠️ Developer Notes
+
+- Built with: React, HTML, CSS, JavaScript  
+- Deployed via GitHub Pages
